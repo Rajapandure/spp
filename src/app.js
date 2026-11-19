@@ -291,271 +291,91 @@ async function renderStudentHome() {
   const cfg = CLASS_CONFIGS[p.classNum] || CLASS_CONFIGS["5"];
   const { subjects, chapters } = state.curriculum;
   const completedCount = Object.values(state.progressMap).filter((pr) => pr.completed).length;
+  const totalChapters = chapters.length;
+  const completionPct = totalChapters ? Math.round((completedCount / totalChapters) * 100) : 0;
   const nextChapter = chapters.find((c) => !state.progressMap[c.id]?.completed) || chapters[0];
+  const firstName = (p.name || "Learner").trim().split(/\s+/)[0];
 
   return `
-    <div class="sp-container">
-      <div class="sp-card sp-animate-pop" style="padding:20px;margin-bottom:18px;background:linear-gradient(135deg, ${cfg.accentPrimary}18, ${cfg.accentSecondary}18);">
-        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px;">
-          <div>
-            <span class="sp-badge" style="background:${cfg.accentPrimary};color:#fff;">${cfg.label} (${cfg.labelHi}) · ${p.session}</span>
-            <h2 style="margin:8px 0 4px;font-size:1.35rem;">Namaste, ${p.name}! Ready to learn?</h2>
-            <p style="margin:0;font-size:0.88rem;color:var(--text-secondary);">Student ID: <code>${p.studentId}</code> · ${completedCount}/${chapters.length} chapters completed</p>
+    <main class="sp-container sp-dashboard">
+      <section class="sp-welcome-panel sp-animate-pop">
+        <div class="sp-welcome-copy">
+          <span class="sp-class-pill">${cfg.label} · ${cfg.labelHi} <span aria-hidden="true">•</span> ${p.session}</span>
+          <p class="sp-welcome-eyebrow">YOUR LEARNING SPACE</p>
+          <h1>Namaste, ${firstName}! <span aria-hidden="true">👋</span></h1>
+          <p class="sp-welcome-subtitle">A new day is a new chance to learn something amazing.</p>
+          <div class="sp-welcome-meta">
+            <span>Student ID: <strong>${p.studentId}</strong></span>
+            <span class="sp-meta-dot" aria-hidden="true">•</span>
+            <span>Class ${p.classNum}</span>
           </div>
           ${nextChapter ? `
-            <button class="sp-btn sp-btn-primary" onclick="window.SP.openChapter('${nextChapter.subjectId}','${nextChapter.id}','LEARN')">
-              ▶ Continue: ${nextChapter.title.slice(0, 32)}${nextChapter.title.length > 32 ? "..." : ""}
+            <button class="sp-btn sp-btn-primary sp-continue-btn" onclick="window.SP.openChapter('${nextChapter.subjectId}','${nextChapter.id}','LEARN')">
+              <span aria-hidden="true">▶</span> Continue learning
+              <span class="sp-continue-title">${nextChapter.title.slice(0, 36)}${nextChapter.title.length > 36 ? "…" : ""}</span>
             </button>
           ` : ""}
         </div>
-      </div>
-
-      <h3 style="margin:0 0 10px;">📚 My Subjects (${cfg.label})</h3>
-      ${subjects.length === 0 ? `
-        <div class="sp-card" style="padding:24px;text-align:center;color:var(--text-muted);">
-          No published textbooks yet for Class ${p.classNum} · ${BOARDS[p.board]?.name} · ${MEDIUMS[p.medium]?.name}. Ask your teacher to publish content in the CMS.
+        <div class="sp-welcome-progress" aria-label="${completionPct}% chapter completion">
+          <div class="sp-progress-ring" style="--progress:${completionPct};">
+            <div class="sp-progress-ring-inner">
+              <strong>${completionPct}%</strong>
+              <span>Complete</span>
+            </div>
+          </div>
+          <div class="sp-progress-caption"><strong>${completedCount} of ${totalChapters}</strong><span>chapters completed</span></div>
         </div>
-      ` : `
-        <div class="sp-grid-auto" style="margin-bottom:22px;">
-          ${subjects.map((sub) => {
-            const subChs = chapters.filter((c) => c.subjectId === sub.id);
-            const done = subChs.filter((c) => state.progressMap[c.id]?.completed).length;
-            return `
-              <div class="sp-card" style="padding:18px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:12px;" onclick="window.SP.openSubject('${sub.id}')">
-                <div style="display:flex;align-items:center;gap:12px;">
-                  ${renderSubjectSVG(sub.icon, 52)}
-                  <div>
-                    <div style="font-weight:800;font-size:1.05rem;">${sub.name}</div>
-                    <div style="font-size:0.8rem;color:var(--text-muted);">${sub.books.map((b) => b.title).join(", ")}</div>
-                  </div>
-                </div>
-                <div>
-                  <div style="display:flex;justify-content:space-between;font-size:0.78rem;font-weight:700;margin-bottom:4px;">
-                    <span>${subChs.length} Chapter(s)</span>
-                    <span>${done}/${subChs.length} Done</span>
-                  </div>
-                  <div style="height:8px;background:var(--bg-muted);border-radius:999px;overflow:hidden;">
-                    <div style="height:100%;width:${subChs.length ? Math.round((done / subChs.length) * 100) : 0}%;background:${cfg.accentPrimary};"></div>
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join("")}
+        <span class="sp-hero-decoration sp-hero-decoration-one" aria-hidden="true">✦</span>
+        <span class="sp-hero-decoration sp-hero-decoration-two" aria-hidden="true">✧</span>
+      </section>
+
+      <section class="sp-dashboard-section" aria-labelledby="sp-subjects-title">
+        <div class="sp-section-heading">
+          <div><p class="sp-section-kicker">PICK UP WHERE YOU LEFT OFF</p><h2 id="sp-subjects-title">My Subjects</h2></div>
+          <span class="sp-section-count">${subjects.length} subjects</span>
         </div>
-      `}
-
-      <h3 style="margin:0 0 10px;">🚀 Learning Tools</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;">
-        <button class="sp-card sp-btn" style="flex-direction:column;padding:16px;height:auto;color:var(--text-primary);" onclick="window.SP.setView('books')"><span style="font-size:1.5rem;">📥</span><span>My Books & Offline</span></button>
-        <button class="sp-card sp-btn" style="flex-direction:column;padding:16px;height:auto;color:var(--text-primary);" onclick="window.SP.openQuickTab('PRACTICE')"><span style="font-size:1.5rem;">🎯</span><span>Practice Bank</span></button>
-        
-        <button class="sp-card sp-btn" style="flex-direction:column;padding:16px;height:auto;color:var(--text-primary);" onclick="window.SP.openQuickTab('PLAY')"><span style="font-size:1.5rem;">🎮</span><span>Learning Games</span></button>
-        <button class="sp-card sp-btn" style="flex-direction:column;padding:16px;height:auto;color:var(--text-primary);" onclick="window.SP.setView('mock')"><span style="font-size:1.5rem;">📝</span><span>Mock Papers (20 Q)</span></button>
-        <button class="sp-card sp-btn" style="flex-direction:column;padding:16px;height:auto;color:var(--text-primary);" onclick="window.SP.setView('progress')"><span style="font-size:1.5rem;">📊</span><span>My Progress</span></button>
-      </div>
-    </div>
-  `;
-}
-
-async function renderSubjectChapterWorkspace() {
-  const { subjects, chapters, questions, games } = state.curriculum;
-  const sub = subjects.find((s) => s.id === state.selectedSubjectId) || subjects[0];
-  if (!sub) {
-    return `<div class="sp-container"><div class="sp-card" style="padding:24px;">No subjects available for your class/board/medium yet.</div></div>`;
-  }
-  const subChapters = chapters.filter((c) => c.subjectId === sub.id);
-  const activeChapter = subChapters.find((c) => c.id === state.selectedChapterId) || subChapters[0];
-  const chQuestions = activeChapter ? questions.filter((q) => q.chapterId === activeChapter.id) : [];
-  const chGames = activeChapter ? games.filter((g) => g.chapterId === activeChapter.id) : [];
-
-  let tabBody = "";
-  if (!activeChapter) {
-    tabBody = `<div style="padding:24px;text-align:center;color:var(--text-muted);">No published chapters in ${sub.name} yet.</div>`;
-  } else if (state.chapterTab === "LEARN") {
-    tabBody = await renderLearnChapterHTML(activeChapter, state.profile, state.readerFontSize);
-  } else if (state.chapterTab === "PRACTICE") {
-    tabBody = await renderPracticeTab(activeChapter, chQuestions);
-  
-  } else if (state.chapterTab === "PLAY") {
-    tabBody = renderGamesTab(activeChapter, chGames, chQuestions);
-  } else if (state.chapterTab === "TEST") {
-    tabBody = renderQuickChapterTestTab(sub, activeChapter, chQuestions);
-  }
-
-  return `
-    <div class="sp-container">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-        <button class="sp-btn sp-btn-secondary" style="min-height:36px;padding:0 12px;" onclick="window.SP.setView('home')">← Dashboard</button>
-        ${subjects.map((s) => `<button class="sp-btn ${s.id === sub.id ? "sp-btn-primary" : "sp-btn-secondary"}" style="min-height:36px;padding:0 12px;" onclick="window.SP.openSubject('${s.id}')">${s.name}</button>`).join("")}
-      </div>
-
-      <div style="display:grid;grid-template-columns:minmax(220px,280px) 1fr;gap:16px;align-items:start;" class="sp-workspace-grid">
-        <aside class="sp-card" style="padding:14px;">
-          <div style="font-weight:800;font-size:0.85rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Chapters</div>
-          <div style="display:grid;gap:6px;">
-            ${subChapters.map((c) => {
-              const isDone = Boolean(state.progressMap[c.id]?.completed);
-              const isAct = activeChapter && c.id === activeChapter.id;
+        ${subjects.length === 0 ? `
+          <div class="sp-card sp-empty-state">
+            <span class="sp-empty-icon" aria-hidden="true">📚</span>
+            <strong>Your classroom is getting ready</strong>
+            <p>No published textbooks yet for Class ${p.classNum} · ${BOARDS[p.board]?.name} · ${MEDIUMS[p.medium]?.name}. Ask your teacher to publish content in the CMS.</p>
+          </div>
+        ` : `
+          <div class="sp-subject-grid">
+            ${subjects.map((sub) => {
+              const subChs = chapters.filter((c) => c.subjectId === sub.id);
+              const done = subChs.filter((c) => state.progressMap[c.id]?.completed).length;
+              const pct = subChs.length ? Math.round((done / subChs.length) * 100) : 0;
               return `
-                <button class="sp-btn ${isAct ? "sp-btn-primary" : "sp-btn-secondary"}" style="justify-content:space-between;text-align:left;height:auto;padding:10px 12px;font-size:0.84rem;" onclick="window.SP.openChapter('${sub.id}','${c.id}','${state.chapterTab}')">
-                  <span>${c.title}</span>
-                  <span>${isDone ? "✅" : ""}</span>
+                <button type="button" class="sp-card sp-subject-tile" onclick="window.SP.openSubject('${sub.id}')" aria-label="Open ${sub.name}, ${subChs.length} chapters">
+                  <span class="sp-subject-art">${renderSubjectSVG(sub.icon, 54)}</span>
+                  <span class="sp-subject-main">
+                    <strong>${sub.name}</strong>
+                    <span class="sp-subject-books">${sub.books.map((b) => b.title).join(", ") || "Learning book"}</span>
+                  </span>
+                  <span class="sp-subject-arrow" aria-hidden="true">↗</span>
+                  <span class="sp-subject-stats"><span>${subChs.length} chapters</span><strong>${done}/${subChs.length} done</strong></span>
+                  <span class="sp-subject-progress"><span style="width:${pct}%;"></span></span>
                 </button>
               `;
             }).join("")}
           </div>
-        </aside>
+        `}
+      </section>
 
-        <main class="sp-card" style="padding:18px;min-width:0;">
-          ${activeChapter ? `
-            <h2 class="sp-chapter-head" style="margin:0 0 12px;font-size:1.28rem;">${activeChapter.title}</h2>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;border-bottom:1px solid var(--border-subtle);padding-bottom:12px;">
-              ${["LEARN", "PRACTICE", "PLAY", "TEST"].map((t) => `
-                <button class="sp-btn ${state.chapterTab === t ? "sp-btn-primary" : "sp-btn-secondary"}" style="min-height:38px;padding:0 14px;font-size:0.82rem;" onclick="window.SP.setChapterTab('${t}')">${t}</button>
-              `).join("")}
-            </div>
-          ` : ""}
-          ${tabBody}
-        </main>
-      </div>
-    </div>
-  `;
-}
-async function renderPracticeTab(chapter, chQuestions) {
-  const escapeHTML = (value) => String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-  // Practice contains only the exercises supplied with this textbook chapter.
-  const exercises = Array.isArray(chapter.exercises)
-    ? chapter.exercises.filter(ex =>
-        ex && typeof ex.q === "string" && ex.q.trim()
-      )
-    : [];
-
-  if (!exercises.length) {
-    return `
-      <div class="sp-card" style="padding:24px;text-align:center;">
-        <div style="font-size:2rem;margin-bottom:8px;">📖</div>
-        <h3>No Textbook Exercises Available</h3>
-        <p style="color:var(--text-secondary);">
-          Verified exercises have not been added for
-          <strong>${escapeHTML(chapter.title)}</strong> yet.
-        </p>
-        <p style="font-size:.82rem;color:var(--text-muted);">
-          This section will display the actual textbook exercises when your
-          teacher adds them. Unrelated questions will not be shown.
-        </p>
-      </div>
-    `;
-  }
-
-  return `
-    <div style="display:grid;gap:14px;">
-
-      <div class="sp-card" style="padding:16px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="font-size:2rem;">📚</div>
-          <div>
-            <h3 style="margin:0;">Textbook Practice</h3>
-            <div style="font-size:.83rem;color:var(--text-muted);">
-              ${exercises.length} exercise(s) · Original textbook order
-            </div>
-          </div>
+      <section class="sp-dashboard-section sp-tools-section" aria-labelledby="sp-tools-title">
+        <div class="sp-section-heading">
+          <div><p class="sp-section-kicker">LEARN IN YOUR OWN WAY</p><h2 id="sp-tools-title">Learning Hub</h2></div>
         </div>
-        <p style="font-size:.84rem;color:var(--text-secondary);margin:10px 0 0;">
-          Attempt each question yourself before opening its hint or solution.
-        </p>
-      </div>
-
-      ${exercises.map((ex, i) => {
-        const questionNo = escapeHTML(ex.qNo || i + 1);
-        const hasAnswer = Boolean(
-          String(ex.ans ?? "").trim() ||
-          String(ex.steps ?? "").trim()
-        );
-
-        return `
-          <article class="sp-card" style="padding:16px;">
-
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-              <span class="sp-badge"
-                style="background:var(--accent-primary);color:#fff;">
-                Question ${questionNo}
-              </span>
-
-              ${ex.marks ? `
-                <span class="sp-badge"
-                  style="background:var(--bg-muted);color:var(--text-secondary);">
-                  ${escapeHTML(ex.marks)} Mark(s)
-                </span>
-              ` : ""}
-            </div>
-
-            <div style="font-weight:700;line-height:1.6;margin-bottom:12px;white-space:pre-wrap;">
-              ${escapeHTML(ex.q)}
-            </div>
-
-            <label style="display:block;font-size:.82rem;font-weight:700;margin-bottom:6px;">
-              Your Answer
-            </label>
-
-            <textarea
-              class="sp-textarea"
-              rows="3"
-              placeholder="Write your answer or working here..."
-              aria-label="Answer for question ${questionNo}">
-            </textarea>
-
-            ${ex.hint ? `
-              <details style="margin-top:12px;padding:10px;border-radius:10px;background:var(--bg-muted);">
-                <summary style="cursor:pointer;font-weight:700;">
-                  💡 Show Hint
-                </summary>
-                <div style="margin-top:8px;white-space:pre-wrap;font-size:.9rem;">
-                  ${escapeHTML(ex.hint)}
-                </div>
-              </details>
-            ` : ""}
-
-            ${hasAnswer ? `
-              <details style="margin-top:10px;padding:10px;border-radius:10px;background:var(--bg-muted);">
-                <summary style="cursor:pointer;font-weight:700;">
-                  ✓ Show Answer & Solution
-                </summary>
-
-                ${ex.ans ? `
-                  <div style="margin-top:10px;">
-                    <strong>Answer:</strong>
-                    <div style="white-space:pre-wrap;margin-top:4px;">
-                      ${escapeHTML(ex.ans)}
-                    </div>
-                  </div>
-                ` : ""}
-
-                ${ex.steps ? `
-                  <div style="margin-top:10px;">
-                    <strong>Step-by-Step Solution:</strong>
-                    <div style="white-space:pre-wrap;margin-top:4px;">
-                      ${escapeHTML(ex.steps)}
-                    </div>
-                  </div>
-                ` : ""}
-              </details>
-            ` : `
-              <div style="margin-top:10px;font-size:.82rem;color:var(--text-muted);">
-                The answer or solution has not been supplied yet.
-              </div>
-            `}
-
-          </article>
-        `;
-      }).join("")}
-
-    </div>
+        <div class="sp-tools-grid">
+          <button type="button" class="sp-card sp-tool-tile sp-tool-books" onclick="window.SP.setView('books')"><span class="sp-tool-icon" aria-hidden="true">📚</span><span class="sp-tool-copy"><strong>My Books</strong><small>Read and learn offline</small></span><span class="sp-tool-arrow" aria-hidden="true">→</span></button>
+          <button type="button" class="sp-card sp-tool-tile sp-tool-practice" onclick="window.SP.openQuickTab('PRACTICE')"><span class="sp-tool-icon" aria-hidden="true">✍️</span><span class="sp-tool-copy"><strong>Practice</strong><small>Build your skills</small></span><span class="sp-tool-arrow" aria-hidden="true">→</span></button>
+          <button type="button" class="sp-card sp-tool-tile sp-tool-play" onclick="window.SP.openQuickTab('PLAY')"><span class="sp-tool-icon" aria-hidden="true">🎮</span><span class="sp-tool-copy"><strong>Play & Learn</strong><small>Learn through games</small></span><span class="sp-tool-arrow" aria-hidden="true">→</span></button>
+          <button type="button" class="sp-card sp-tool-tile sp-tool-tests" onclick="window.SP.setView('mock')"><span class="sp-tool-icon" aria-hidden="true">📝</span><span class="sp-tool-copy"><strong>Mock Tests</strong><small>Check what you know</small></span><span class="sp-tool-arrow" aria-hidden="true">→</span></button>
+          <button type="button" class="sp-card sp-tool-tile sp-tool-progress" onclick="window.SP.setView('progress')"><span class="sp-tool-icon" aria-hidden="true">🏆</span><span class="sp-tool-copy"><strong>My Progress</strong><small>Celebrate your growth</small></span><span class="sp-tool-arrow" aria-hidden="true">→</span></button>
+        </div>
+      </section>
+    </main>
   `;
 }
 function renderGamesTab(chapter, chGames, chQuestions) {

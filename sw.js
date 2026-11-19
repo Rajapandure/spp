@@ -1,4 +1,4 @@
-const CACHE_NAME = "scholars-point-v7-offline";
+const CACHE_NAME = "scholars-point-v8-offline";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -8,6 +8,8 @@ const CORE_ASSETS = [
   "./src/db/database.js",
   "./src/auth/auth.js",
   "./src/ui/illustrations.js",
+  "./src/ui/assets.js",
+  "./src/ui/icons.js",
   "./src/curriculum/seed_part1.js",
   "./src/curriculum/seed_part2.js",
   "./src/curriculum/curriculumService.js",

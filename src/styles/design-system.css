@@ -239,6 +239,7 @@ html, body {
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.55);
   margin-top: 6px;
+  text-align: center;
 }
 
 .sp-sidebar-nav { display: grid; gap: 6px; margin-top: 24px; }
@@ -381,6 +382,11 @@ html, body {
   border: 2px solid #ffffff;
   box-shadow: var(--shadow-card);
   overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #1e3a8a;
+  font-size: 0.85rem;
 }
 
 /* ---------- Dashboard grid ---------- */
@@ -566,10 +572,10 @@ html, body {
 }
 .sp-promo-trophy {
   position: absolute;
-  right: 6px;
-  bottom: -4px;
-  width: 90px;
-  height: auto;
+  right: 10px;
+  bottom: 8px;
+  font-size: 3.6rem;
+  line-height: 1;
 }
 
 /* ---------- My Subjects ---------- */
@@ -595,6 +601,7 @@ html, body {
   color: var(--accent-primary);
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .sp-subject-grid {
@@ -711,7 +718,7 @@ html, body {
 }
 .sp-achv-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 

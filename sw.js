@@ -1,26 +1,18 @@
-const CACHE_NAME = "scholars-point-v7-offline";
-const CORE_ASSETS = [
+const CACHE_NAME = "scholars-point-v2";
+const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./src/styles/design-system.css",
-  "./src/config/classes.js",
-  "./src/db/database.js",
-  "./src/auth/auth.js",
-  "./src/ui/illustrations.js",
-  "./src/curriculum/seed_part1.js",
-  "./src/curriculum/seed_part2.js",
-  "./src/curriculum/curriculumService.js",
-  "./src/reader/textbookReader.js",
-  "./src/games/gameEngine.js",
-  "./src/assessment/examEngine.js",
-  "./src/cms/cmsModule.js",
-  "./src/app.js"
+  "./src/app.js",
+  "./src/db/indexedDb.js",
+  "./src/components/roughSlate.js",
+  "./data/packs/class6-starter.json"
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
   );
 });
 
@@ -36,12 +28,11 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((resp) => {
-        const clone = resp.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        return resp;
-      }).catch(() => caches.match("./index.html"));
+      return cached || fetch(event.request).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        return res;
+      }).catch(() => cached);
     })
   );
 });

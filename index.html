@@ -40,12 +40,18 @@
           </nav>
         </div>
 
-        <div>
+        <div style="display:grid;gap:8px;">
+          <button class="sp-theme-toggle" id="sp-open-slate-btn" type="button" style="justify-content:center;background:rgba(245,158,11,0.22);border:1px solid rgba(251,191,36,0.4);">
+            <span>✏️ Rough Slate</span>
+          </button>
+          <button class="sp-theme-toggle" id="sp-open-packs-btn" type="button" style="justify-content:center;background:rgba(16,185,129,0.22);border:1px solid rgba(52,211,153,0.4);">
+            <span>📥 Offline Packs</span>
+          </button>
           <button class="sp-theme-toggle" id="sp-theme-toggle" type="button">
             <span id="sp-theme-label">☀️ Light</span>
             <span class="sp-switch"></span>
           </button>
-          <div class="sp-brand-version">v1.0.0</div>
+          <div class="sp-brand-version">v2.0.0 • Offline Ready</div>
         </div>
       </aside>
 
@@ -58,151 +64,158 @@
             <p class="sp-greeting-sub" id="sp-greeting-sub">Ready to learn something new today?</p>
           </div>
           <div class="sp-topbar-right">
-            <span class="sp-class-pill">Class 6 • MP Board • English Medium • 2026-27</span>
-            <button class="sp-icon-btn" type="button" aria-label="Notifications">
+            <span class="sp-class-pill" id="sp-class-pill">Class 6 • MP Board • English Medium • 2026-27</span>
+            <button class="sp-icon-btn" id="sp-slate-top-btn" type="button" title="Open Rough Slate" aria-label="Rough Slate">✏️</button>
+            <button class="sp-icon-btn" id="sp-notif-btn" type="button" aria-label="Notifications">
               🔔
-              <span class="sp-notif-dot">2</span>
+              <span class="sp-notif-dot" id="sp-notif-count">2</span>
             </button>
             <div class="sp-avatar" aria-label="Profile">
-              <img src="./assets/avatar.png" alt="" width="40" height="40" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+              <img src="./assets/avatar.png" alt="" width="40" height="40" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentNode.textContent='AP';" />
             </div>
           </div>
         </header>
 
-        <div class="sp-dash-grid">
-          <div>
-            <!-- Learning journey hero -->
-            <section class="sp-hero-journey">
-              <img class="sp-hero-mascot" src="./assets/mascot-boy.png" alt="" onerror="this.style.display='none'" />
-              <div class="sp-hero-head">
-                <h2 class="sp-hero-title">Your Learning Journey</h2>
-                <span class="sp-level-badge">⭐ Level 4</span>
+        <!-- Dynamic View Container (Home rendered by default, switched via JS) -->
+        <div id="sp-view-home" class="sp-view-panel">
+          <div class="sp-dash-grid">
+            <div>
+              <!-- Learning journey hero -->
+              <section class="sp-hero-journey">
+                <img class="sp-hero-mascot" src="./assets/mascot-boy.png" alt="" onerror="this.style.display='none'" />
+                <div class="sp-hero-head">
+                  <h2 class="sp-hero-title">Your Learning Journey</h2>
+                  <span class="sp-level-badge" id="sp-level-badge">⭐ Level 4</span>
+                </div>
+                <div class="sp-xp-value" id="sp-xp-value">640 <span>XP</span></div>
+                <div class="sp-xp-bar"><div class="sp-xp-bar-fill" id="sp-xp-fill" style="width:80%"></div></div>
+                <div class="sp-xp-meta" style="margin-top:8px;">
+                  <span id="sp-next-level">Next Level: 800 XP</span>
+                  <span id="sp-xp-remaining">⭐ 160 XP to next level</span>
+                  <span class="sp-streak" id="sp-streak-label">🔥 5-day streak</span>
+                </div>
+              </section>
+
+              <!-- My Subjects -->
+              <div class="sp-section-head">
+                <h2 class="sp-section-title">📘 My Subjects</h2>
+                <a class="sp-section-link" data-nav="subjects">View All →</a>
               </div>
-              <div class="sp-xp-value">640 <span>XP</span></div>
-              <div class="sp-xp-bar"><div class="sp-xp-bar-fill" style="width:80%"></div></div>
-              <div class="sp-xp-meta" style="margin-top:8px;">
-                <span>Next Level: 800 XP</span>
-                <span>⭐ 160 XP to next level</span>
-                <span class="sp-streak">🔥 5-day streak</span>
+
+              <div class="sp-subject-grid" id="sp-home-subjects">
+                <article class="sp-subject-card tint-math" data-subject="math">
+                  <div class="sp-subject-icon" style="color:#2563eb;font-size:1.5rem;">🧮</div>
+                  <h3>Mathematics</h3>
+                  <div class="sp-subject-meta">12 Chapters<br/>8 Completed</div>
+                  <div class="sp-mini-row">
+                    <div class="sp-mini-bar"><span style="width:65%;background:var(--bar);"></span></div>
+                    <span class="sp-pct">65%</span>
+                  </div>
+                  <button class="sp-btn sp-btn-subject" type="button" data-open-subject="math">Go to Subject →</button>
+                </article>
+
+                <article class="sp-subject-card tint-science" data-subject="science">
+                  <div class="sp-subject-icon" style="color:#10b981;font-size:1.5rem;">🧪</div>
+                  <h3>Science</h3>
+                  <div class="sp-subject-meta">10 Chapters<br/>4 Completed</div>
+                  <div class="sp-mini-row">
+                    <div class="sp-mini-bar"><span style="width:40%;background:var(--bar);"></span></div>
+                    <span class="sp-pct">40%</span>
+                  </div>
+                  <button class="sp-btn sp-btn-subject" type="button" data-open-subject="science">Go to Subject →</button>
+                </article>
+
+                <article class="sp-subject-card tint-english" data-subject="english">
+                  <div class="sp-subject-icon" style="color:#f97316;font-size:1.5rem;">📖</div>
+                  <h3>English Reader</h3>
+                  <div class="sp-subject-meta">8 Chapters<br/>2 Completed</div>
+                  <div class="sp-mini-row">
+                    <div class="sp-mini-bar"><span style="width:30%;background:var(--bar);"></span></div>
+                    <span class="sp-pct">30%</span>
+                  </div>
+                  <button class="sp-btn sp-btn-subject" type="button" data-open-subject="english">Go to Subject →</button>
+                </article>
+
+                <article class="sp-subject-card tint-hindi" data-subject="hindi">
+                  <div class="sp-subject-icon" style="color:#8b5cf6;font-size:1.5rem;font-weight:800;">अ</div>
+                  <h3>Hindi</h3>
+                  <div class="sp-subject-meta">9 Chapters<br/>5 Completed</div>
+                  <div class="sp-mini-row">
+                    <div class="sp-mini-bar"><span style="width:55%;background:var(--bar);"></span></div>
+                    <span class="sp-pct">55%</span>
+                  </div>
+                  <button class="sp-btn sp-btn-subject" type="button" data-open-subject="hindi">Go to Subject →</button>
+                </article>
               </div>
-            </section>
 
-            <!-- My Subjects -->
-            <div class="sp-section-head">
-              <h2 class="sp-section-title">📘 My Subjects</h2>
-              <a class="sp-section-link" href="#">View All →</a>
-            </div>
-
-            <div class="sp-subject-grid">
-              <article class="sp-subject-card tint-math">
-                <div class="sp-subject-icon" style="color:#2563eb;font-size:1.5rem;">🧮</div>
-                <h3>Mathematics</h3>
-                <div class="sp-subject-meta">12 Chapters<br/>8 Completed</div>
-                <div class="sp-mini-row">
-                  <div class="sp-mini-bar"><span style="width:65%;background:var(--bar);"></span></div>
-                  <span class="sp-pct">65%</span>
-                </div>
-                <button class="sp-btn sp-btn-subject" type="button">Go to Subject →</button>
-              </article>
-
-              <article class="sp-subject-card tint-science">
-                <div class="sp-subject-icon" style="color:#10b981;font-size:1.5rem;">🧪</div>
-                <h3>Science</h3>
-                <div class="sp-subject-meta">10 Chapters<br/>4 Completed</div>
-                <div class="sp-mini-row">
-                  <div class="sp-mini-bar"><span style="width:40%;background:var(--bar);"></span></div>
-                  <span class="sp-pct">40%</span>
-                </div>
-                <button class="sp-btn sp-btn-subject" type="button">Go to Subject →</button>
-              </article>
-
-              <article class="sp-subject-card tint-english">
-                <div class="sp-subject-icon" style="color:#f97316;font-size:1.5rem;">📖</div>
-                <h3>English Reader</h3>
-                <div class="sp-subject-meta">8 Chapters<br/>2 Completed</div>
-                <div class="sp-mini-row">
-                  <div class="sp-mini-bar"><span style="width:30%;background:var(--bar);"></span></div>
-                  <span class="sp-pct">30%</span>
-                </div>
-                <button class="sp-btn sp-btn-subject" type="button">Go to Subject →</button>
-              </article>
-
-              <article class="sp-subject-card tint-hindi">
-                <div class="sp-subject-icon" style="color:#8b5cf6;font-size:1.5rem;font-weight:800;">अ</div>
-                <h3>Hindi</h3>
-                <div class="sp-subject-meta">9 Chapters<br/>5 Completed</div>
-                <div class="sp-mini-row">
-                  <div class="sp-mini-bar"><span style="width:55%;background:var(--bar);"></span></div>
-                  <span class="sp-pct">55%</span>
-                </div>
-                <button class="sp-btn sp-btn-subject" type="button">Go to Subject →</button>
-              </article>
-            </div>
-
-            <!-- Shortcuts & achievements -->
-            <div class="sp-shortcuts-row">
-              <div>
-                <div class="sp-section-head" style="margin-top:0;">
-                  <h2 class="sp-section-title" style="font-size:0.9rem;">⚡ Learning Shortcuts</h2>
-                </div>
-                <div class="sp-shortcut-grid">
-                  <div class="sp-shortcut-tile" style="--tint:#f3e8ff;"><span class="sp-shortcut-icon">🎮</span>Learning Games</div>
-                  <div class="sp-shortcut-tile" style="--tint:#dcfce7;"><span class="sp-shortcut-icon">📝</span>Mock Papers</div>
-                  <div class="sp-shortcut-tile" style="--tint:#ffedd5;"><span class="sp-shortcut-icon">🔁</span>Revision</div>
-                  <div class="sp-shortcut-tile" style="--tint:#ffe4e6;"><span class="sp-shortcut-icon">📕</span>Mistake Notebook</div>
-                </div>
-              </div>
-              <div>
-                <div class="sp-section-head" style="margin-top:0;">
-                  <h2 class="sp-section-title" style="font-size:0.9rem;">🏆 Recent Achievements</h2>
-                  <a class="sp-section-link" href="#">View All →</a>
-                </div>
-                <div class="sp-achv-grid">
-                  <div class="sp-shortcut-tile" style="--tint:#fff7ed;"><span class="sp-shortcut-icon">🔥</span>5-Day Streak</div>
-                  <div class="sp-shortcut-tile" style="--tint:#fef9c3;"><span class="sp-shortcut-icon">🥇</span>Quiz Champion</div>
-                  <div class="sp-shortcut-tile" style="--tint:#fee2e2;"><span class="sp-shortcut-icon">🎯</span>Perfect Score</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right column -->
-          <aside class="sp-dash-side">
-            <section class="sp-card sp-side-card">
-              <h3 class="sp-side-title">▶️ Continue Learning <a href="#">📖</a></h3>
-              <div class="sp-continue-row">
-                <div class="sp-continue-icon" style="background:#2563eb;">🧮</div>
-                <div class="sp-continue-text">
-                  <strong>Mathematics</strong>
-                  <small>Chapter 2 • Whole Numbers</small>
-                  <div class="sp-xp-bar" style="margin-top:6px;height:6px;"><div class="sp-xp-bar-fill" style="width:60%"></div></div>
-                </div>
-                <span style="font-size:0.72rem;font-weight:800;">60%</span>
-              </div>
-              <button class="sp-btn sp-btn-primary" type="button" style="width:100%;">Continue Learning →</button>
-            </section>
-
-            <section class="sp-card sp-side-card">
-              <h3 class="sp-side-title">📋 My Tasks <a href="#">View All →</a></h3>
-              <div class="sp-task-card">
-                <span style="font-size:1.6rem;">📝</span>
+              <!-- Shortcuts & achievements -->
+              <div class="sp-shortcuts-row">
                 <div>
-                  <strong>2 Tasks Pending</strong>
-                  <small>1 due soon</small>
+                  <div class="sp-section-head" style="margin-top:0;">
+                    <h2 class="sp-section-title" style="font-size:0.9rem;">⚡ Learning Shortcuts</h2>
+                  </div>
+                  <div class="sp-shortcut-grid">
+                    <div class="sp-shortcut-tile" data-shortcut="slate" style="--tint:#f3e8ff;"><span class="sp-shortcut-icon">✏️</span>Rough Slate</div>
+                    <div class="sp-shortcut-tile" data-shortcut="mock" style="--tint:#dcfce7;"><span class="sp-shortcut-icon">📝</span>Mock Papers</div>
+                    <div class="sp-shortcut-tile" data-shortcut="packs" style="--tint:#ffedd5;"><span class="sp-shortcut-icon">📥</span>Offline Packs</div>
+                    <div class="sp-shortcut-tile" data-shortcut="mistakes" style="--tint:#ffe4e6;"><span class="sp-shortcut-icon">📕</span>Mistake Notebook</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="sp-section-head" style="margin-top:0;">
+                    <h2 class="sp-section-title" style="font-size:0.9rem;">🏆 Recent Achievements</h2>
+                    <a class="sp-section-link" data-nav="progress">View All →</a>
+                  </div>
+                  <div class="sp-achv-grid">
+                    <div class="sp-shortcut-tile" style="--tint:#fff7ed;"><span class="sp-shortcut-icon">🔥</span>5-Day Streak</div>
+                    <div class="sp-shortcut-tile" style="--tint:#fef9c3;"><span class="sp-shortcut-icon">🥇</span>Quiz Champion</div>
+                    <div class="sp-shortcut-tile" style="--tint:#fee2e2;"><span class="sp-shortcut-icon">🎯</span>Perfect Score</div>
+                  </div>
                 </div>
               </div>
-              <button class="sp-btn sp-btn-primary" type="button" style="width:100%;">View Tasks →</button>
-            </section>
+            </div>
 
-            <section class="sp-promo-purple">
-              <div>
-                <h4>Dream Big, Learn More!</h4>
-                <p>You are making excellent progress</p>
-              </div>
-              <span class="sp-promo-trophy" style="font-size:4.2rem;line-height:1;">🏆</span>
-            </section>
-          </aside>
+            <!-- Right column -->
+            <aside class="sp-dash-side">
+              <section class="sp-card sp-side-card">
+                <h3 class="sp-side-title">▶️ Continue Learning <a data-open-subject="math">📖</a></h3>
+                <div class="sp-continue-row" id="sp-continue-card">
+                  <div class="sp-continue-icon" style="background:#2563eb;">🧮</div>
+                  <div class="sp-continue-text">
+                    <strong>Mathematics</strong>
+                    <small>Chapter 2 • Whole Numbers</small>
+                    <div class="sp-xp-bar" style="margin-top:6px;height:6px;"><div class="sp-xp-bar-fill" style="width:60%"></div></div>
+                  </div>
+                  <span style="font-size:0.72rem;font-weight:800;">60%</span>
+                </div>
+                <button class="sp-btn sp-btn-primary" type="button" id="sp-continue-btn" style="width:100%;">Continue Learning →</button>
+              </section>
+
+              <section class="sp-card sp-side-card">
+                <h3 class="sp-side-title">📋 My Tasks <a data-nav="tasks">View All →</a></h3>
+                <div class="sp-task-card">
+                  <span style="font-size:1.6rem;">📝</span>
+                  <div>
+                    <strong id="sp-pending-tasks-title">2 Tasks Pending</strong>
+                    <small>1 due soon</small>
+                  </div>
+                </div>
+                <button class="sp-btn sp-btn-primary" type="button" data-nav="tasks" style="width:100%;">View Tasks →</button>
+              </section>
+
+              <section class="sp-promo-purple">
+                <div>
+                  <h4>Dream Big, Learn More!</h4>
+                  <p>You are making excellent progress</p>
+                </div>
+                <span class="sp-promo-trophy">🏆</span>
+              </section>
+            </aside>
+          </div>
         </div>
+
+        <!-- Secondary Views (Subjects, Chapter Reader, Tasks, Progress, Profile) -->
+        <div id="sp-view-dynamic" class="sp-view-panel" style="display:none;"></div>
 
       </main>
     </div>
@@ -219,15 +232,30 @@
 
   <!-- Floating Rough Slate Modal -->
   <div id="sp-slate-modal" class="sp-modal-backdrop no-print" style="display:none;">
-    <div class="sp-modal" style="max-width:540px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div class="sp-modal" style="max-width:560px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap;">
         <strong>✏️ Interactive Rough Slate</strong>
-        <div style="display:flex;gap:8px;">
-          <button class="sp-btn sp-btn-secondary" style="min-height:32px;font-size:12px;" onclick="window.SP.clearRoughSlate()">Clear</button>
-          <button class="sp-btn sp-btn-secondary" style="min-height:32px;font-size:12px;" onclick="window.SP.closeRoughSlate()">Close</button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="sp-btn sp-btn-secondary" style="min-height:32px;padding:0 10px;font-size:12px;" data-pen-color="#1e293b">Black</button>
+          <button class="sp-btn sp-btn-secondary" style="min-height:32px;padding:0 10px;font-size:12px;color:#2563eb;" data-pen-color="#2563eb">Blue</button>
+          <button class="sp-btn sp-btn-secondary" style="min-height:32px;padding:0 10px;font-size:12px;color:#f43f5e;" data-pen-color="#f43f5e">Red</button>
+          <button class="sp-btn sp-btn-secondary" style="min-height:32px;padding:0 10px;font-size:12px;" onclick="window.SP.clearRoughSlate()">Clear</button>
+          <button class="sp-btn sp-btn-danger" style="min-height:32px;padding:0 10px;font-size:12px;" onclick="window.SP.closeRoughSlate()">Close</button>
         </div>
       </div>
-      <canvas id="sp-slate-canvas" width="480" height="280" style="width:100%;height:280px;background:#fffbeb;border:2px dashed #fbbf24;border-radius:14px;touch-action:none;cursor:crosshair;"></canvas>
+      <canvas id="sp-slate-canvas" width="500" height="300" style="width:100%;height:300px;background:#fffbeb;border:2px dashed #fbbf24;border-radius:14px;touch-action:none;cursor:crosshair;"></canvas>
+    </div>
+  </div>
+
+  <!-- Offline Pack Downloader Modal -->
+  <div id="sp-packs-modal" class="sp-modal-backdrop no-print" style="display:none;">
+    <div class="sp-modal" style="max-width:600px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <strong>📥 Offline Curriculum Packs (IndexedDB)</strong>
+        <button class="sp-btn sp-btn-secondary" style="min-height:32px;font-size:12px;" onclick="window.SP.closePacksModal()">Close</button>
+      </div>
+      <p style="font-size:0.84rem;color:var(--text-muted);margin-top:0;">Download NCERT / MP Board Class 1–10 packs once and study completely offline.</p>
+      <div id="sp-packs-list" style="display:grid;gap:10px;"></div>
     </div>
   </div>
 
@@ -239,7 +267,10 @@
       var label = document.getElementById("sp-theme-label");
       var saved = null;
       try { saved = localStorage.getItem("sp-theme"); } catch (e) {}
-      if (saved === "dark") document.documentElement.classList.add("dark"), document.body.classList.add("dark");
+      if (saved === "dark") {
+        document.documentElement.classList.add("dark");
+        document.body.classList.add("dark");
+      }
       function sync() {
         var dark = document.body.classList.contains("dark");
         label.textContent = dark ? "🌙 Dark" : "☀️ Light";
@@ -250,16 +281,6 @@
         document.documentElement.classList.toggle("dark");
         try { localStorage.setItem("sp-theme", document.body.classList.contains("dark") ? "dark" : "light"); } catch (e) {}
         sync();
-      });
-
-      // Sidebar / bottom nav active state
-      document.querySelectorAll("[data-view]").forEach(function (el) {
-        el.addEventListener("click", function () {
-          var view = el.getAttribute("data-view");
-          document.querySelectorAll("[data-view]").forEach(function (n) {
-            n.classList.toggle("active", n.getAttribute("data-view") === view);
-          });
-        });
       });
     })();
 

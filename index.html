@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Scholars Point" />
+  <meta name="description" content="Scholars Point — Offline-First Digital Learning Platform for Classes 1 to 10 (NCERT, CBSE, MP Board)" />
+  <title>Scholars Point | Classes 1–10 Offline Learning Platform</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./src/styles/design-system.css" />
+</head>
+<body>
+  <div id="sp-toast" style="display:none;position:fixed;top:16px;right:16px;z-index:999;color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;font-size:0.86rem;box-shadow:0 8px 24px rgba(0,0,0,0.2);"></div>
+
+  <div id="sp-app">
+    <div class="sp-app-shell">
+
+      <!-- Royal blue sidebar -->
+      <aside class="sp-sidebar">
+        <div>
+          <div class="sp-brand">
+            <svg width="54" height="46" viewBox="0 0 54 46" aria-hidden="true">
+              <polygon points="27,2 52,14 27,26 2,14" fill="#2563eb"/>
+              <polygon points="27,2 52,14 27,26 2,14" fill="none" stroke="#60a5fa" stroke-width="1"/>
+              <path d="M12 20 v10 c0 4 7 7 15 7 s15-3 15-7 v-10 l-15 7 z" fill="#1d4ed8"/>
+              <line x1="46" y1="16" x2="46" y2="28" stroke="#f59e0b" stroke-width="2"/>
+              <circle cx="46" cy="30" r="2.5" fill="#f59e0b"/>
+            </svg>
+            <div class="sp-brand-name">Scholars<span>Point</span></div>
+          </div>
+
+          <nav class="sp-sidebar-nav" id="sp-nav">
+            <button class="sp-sidebar-btn active" data-view="home">🏠 Home</button>
+            <button class="sp-sidebar-btn" data-view="subjects">📚 My Subjects</button>
+            <button class="sp-sidebar-btn" data-view="tasks">📝 My Tasks</button>
+            <button class="sp-sidebar-btn" data-view="progress">📊 My Progress</button>
+            <button class="sp-sidebar-btn" data-view="profile">👤 My Profile</button>
+          </nav>
+        </div>
+
+        <div>
+          <button class="sp-theme-toggle" id="sp-theme-toggle" type="button">
+            <span id="sp-theme-label">☀️ Light</span>
+            <span class="sp-switch"></span>
+          </button>
+          <div class="sp-brand-version">v1.0.0</div>
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <main class="sp-main-area">
+
+        <header class="sp-topbar">
+          <div>
+            <h1 class="sp-greeting-title" id="sp-greeting">Good Morning, Aarav! 👋</h1>
+            <p class="sp-greeting-sub" id="sp-greeting-sub">Ready to learn something new today?</p>
+          </div>
+          <div class="sp-topbar-right">
+            <span class="sp-class-pill">Class 6 • MP Board • English Medium • 2026-27</span>
+            <button class="sp-icon-btn" type="button" aria-label="Notifications">
+              🔔
+              <span class="sp-notif-dot">2</span>
+            </button>
+            <div class="sp-avatar" aria-label="Profile">
+              <img src="./assets/avatar.png" alt="" width="40" height="40" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'" />
+            </div>
+          </div>
+        </header>
+
+        <div class="sp-dash-grid">
+          <div>
+            <!-- Learning journey hero -->
+            <section class="sp-hero-journey">
+              <img class="sp-hero-mascot" src="./assets/mascot-boy.png" alt="" onerror="this.style.display='none'" />
+              <div class="sp-hero-head">
+                <h2 class="sp-hero-title">Your Learning Journey</h2>
+                <span class="sp-level-badge">⭐ Level 4</span>
+              </div>
+              <div class="sp-xp-value">640 <span>XP</span></div>
+              <div class="sp-xp-bar"><div class="sp-xp-bar-fill" style="width:80%"></div></div>
+              <div class="sp-xp-meta" style="margin-top:8px;">
+                <span>Next Level: 800 XP</span>
+                <span>⭐ 160 XP to next level</span>
+                <span class="sp-streak">🔥 5-day streak</span>
+              </div>
+            </section>
+
+            <!-- My Subjects -->
+            <div class="sp-section-head">
+              <h2 class="sp-section-title">📘 My Subjects</h2>
+              <a class="sp-section-link" href="#">View All →</a>
+            </div>
+
+            <div class="sp-subject-grid">
+              <article class="sp-subject-card tint-math">
+                <div class="sp-subject-icon" style="color:#2563eb;font-size:1.5rem;">🧮</div>
+                <h3>Mathematics</h3>
+                <div class="sp-subject-meta">12 Chapters<br/>8 Completed</div>
+                <div class="sp-mini-row">
+                  <div class="sp-mini-bar"><span style="width:65%;background:var(--bar);"></span></div>
+                  <span class="sp-pct">65%</span>
+                </div>
+                <button class="sp-btn sp-btn-subject" type="button">Go to Subject →</button>
+              </article>
+
+              <article class="sp-subject-card tint-science">
+                <div class="sp-subject-icon" style="color:#10b981;font-size:1.5rem;">🧪</div>
+                <h3>Science</h3>
+                <div class="sp-subject-meta">10 Chapters<br/>4 Completed</div>
+                <div class="sp-mini-row">
+                  <div class="sp-mini-bar"><span style="width:40%;background:var(--bar);"></span></div>
+                  <span class="sp-pct">40%</span>
+                </div>
+                <button class="sp-btn sp-btn-subject" type="button">Go to Subject →</button>
+              </article>
+
+              <article class="sp-subject-card tint-english">
+                <div class="sp-subject-icon" style="color:#f97316;font-size:1.5rem;">📖</div>
+                <h3>English Reader</h3>
+                <div class="sp-subject-meta">8 Chapters<br/>2 Completed</div>
+                <div class="sp-mini-row">
+                  <div class="sp-mini-bar"><span style="width:30%;background:var(--bar);"></span></div>
+                  <span class="sp-pct">30%</span>
+                </div>
+                <button class="sp-btn sp-btn-subject" type="button">Go to Subject →</button>
+              </article>
+
+              <article class="sp-subject-card tint-hindi">
+                <div class="sp-subject-icon" style="color:#8b5cf6;font-size:1.5rem;font-weight:800;">अ</div>
+                <h3>Hindi</h3>
+                <div class="sp-subject-meta">9 Chapters<br/>5 Completed</div>
+                <div class="sp-mini-row">
+                  <div class="sp-mini-bar"><span style="width:55%;background:var(--bar);"></span></div>
+                  <span class="sp-pct">55%</span>
+                </div>
+                <button class="sp-btn sp-btn-subject" type="button">Go to Subject →</button>
+              </article>
+            </div>
+
+            <!-- Shortcuts & achievements -->
+            <div class="sp-shortcuts-row">
+              <div>
+                <div class="sp-section-head" style="margin-top:0;">
+                  <h2 class="sp-section-title" style="font-size:0.9rem;">⚡ Learning Shortcuts</h2>
+                </div>
+                <div class="sp-shortcut-grid">
+                  <div class="sp-shortcut-tile" style="--tint:#f3e8ff;"><span class="sp-shortcut-icon">🎮</span>Learning Games</div>
+                  <div class="sp-shortcut-tile" style="--tint:#dcfce7;"><span class="sp-shortcut-icon">📝</span>Mock Papers</div>
+                  <div class="sp-shortcut-tile" style="--tint:#ffedd5;"><span class="sp-shortcut-icon">🔁</span>Revision</div>
+                  <div class="sp-shortcut-tile" style="--tint:#ffe4e6;"><span class="sp-shortcut-icon">📕</span>Mistake Notebook</div>
+                </div>
+              </div>
+              <div>
+                <div class="sp-section-head" style="margin-top:0;">
+                  <h2 class="sp-section-title" style="font-size:0.9rem;">🏆 Recent Achievements</h2>
+                  <a class="sp-section-link" href="#">View All →</a>
+                </div>
+                <div class="sp-achv-grid">
+                  <div class="sp-shortcut-tile" style="--tint:#fff7ed;"><span class="sp-shortcut-icon">🔥</span>5-Day Streak</div>
+                  <div class="sp-shortcut-tile" style="--tint:#fef9c3;"><span class="sp-shortcut-icon">🥇</span>Quiz Champion</div>
+                  <div class="sp-shortcut-tile" style="--tint:#fee2e2;"><span class="sp-shortcut-icon">🎯</span>Perfect Score</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right column -->
+          <aside class="sp-dash-side">
+            <section class="sp-card sp-side-card">
+              <h3 class="sp-side-title">▶️ Continue Learning <a href="#">📖</a></h3>
+              <div class="sp-continue-row">
+                <div class="sp-continue-icon" style="background:#2563eb;">🧮</div>
+                <div class="sp-continue-text">
+                  <strong>Mathematics</strong>
+                  <small>Chapter 2 • Whole Numbers</small>
+                  <div class="sp-xp-bar" style="margin-top:6px;height:6px;"><div class="sp-xp-bar-fill" style="width:60%"></div></div>
+                </div>
+                <span style="font-size:0.72rem;font-weight:800;">60%</span>
+              </div>
+              <button class="sp-btn sp-btn-primary" type="button" style="width:100%;">Continue Learning →</button>
+            </section>
+
+            <section class="sp-card sp-side-card">
+              <h3 class="sp-side-title">📋 My Tasks <a href="#">View All →</a></h3>
+              <div class="sp-task-card">
+                <span style="font-size:1.6rem;">📝</span>
+                <div>
+                  <strong>2 Tasks Pending</strong>
+                  <small>1 due soon</small>
+                </div>
+              </div>
+              <button class="sp-btn sp-btn-primary" type="button" style="width:100%;">View Tasks →</button>
+            </section>
+
+            <section class="sp-promo-purple">
+              <div>
+                <h4>Dream Big, Learn More!</h4>
+                <p>You are making excellent progress</p>
+              </div>
+              <span class="sp-promo-trophy" style="font-size:4.2rem;line-height:1;">🏆</span>
+            </section>
+          </aside>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="sp-bottom-nav" aria-label="Primary">
+    <button class="sp-sidebar-btn active" style="flex-direction:column;gap:2px;font-size:0.68rem;justify-content:center;" data-view="home">🏠<span>Home</span></button>
+    <button class="sp-sidebar-btn" style="flex-direction:column;gap:2px;font-size:0.68rem;justify-content:center;" data-view="subjects">📚<span>Subjects</span></button>
+    <button class="sp-sidebar-btn" style="flex-direction:column;gap:2px;font-size:0.68rem;justify-content:center;" data-view="tasks">📝<span>Tasks</span></button>
+    <button class="sp-sidebar-btn" style="flex-direction:column;gap:2px;font-size:0.68rem;justify-content:center;" data-view="progress">📊<span>Progress</span></button>
+    <button class="sp-sidebar-btn" style="flex-direction:column;gap:2px;font-size:0.68rem;justify-content:center;" data-view="profile">👤<span>Profile</span></button>
+  </nav>
+
+  <!-- Floating Rough Slate Modal -->
+  <div id="sp-slate-modal" class="sp-modal-backdrop no-print" style="display:none;">
+    <div class="sp-modal" style="max-width:540px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <strong>✏️ Interactive Rough Slate</strong>
+        <div style="display:flex;gap:8px;">
+          <button class="sp-btn sp-btn-secondary" style="min-height:32px;font-size:12px;" onclick="window.SP.clearRoughSlate()">Clear</button>
+          <button class="sp-btn sp-btn-secondary" style="min-height:32px;font-size:12px;" onclick="window.SP.closeRoughSlate()">Close</button>
+        </div>
+      </div>
+      <canvas id="sp-slate-canvas" width="480" height="280" style="width:100%;height:280px;background:#fffbeb;border:2px dashed #fbbf24;border-radius:14px;touch-action:none;cursor:crosshair;"></canvas>
+    </div>
+  </div>
+
+  <script type="module" src="./src/app.js"></script>
+  <script>
+    // Theme toggle (light / dark)
+    (function () {
+      var btn = document.getElementById("sp-theme-toggle");
+      var label = document.getElementById("sp-theme-label");
+      var saved = null;
+      try { saved = localStorage.getItem("sp-theme"); } catch (e) {}
+      if (saved === "dark") document.documentElement.classList.add("dark"), document.body.classList.add("dark");
+      function sync() {
+        var dark = document.body.classList.contains("dark");
+        label.textContent = dark ? "🌙 Dark" : "☀️ Light";
+      }
+      sync();
+      btn.addEventListener("click", function () {
+        document.body.classList.toggle("dark");
+        document.documentElement.classList.toggle("dark");
+        try { localStorage.setItem("sp-theme", document.body.classList.contains("dark") ? "dark" : "light"); } catch (e) {}
+        sync();
+      });
+
+      // Sidebar / bottom nav active state
+      document.querySelectorAll("[data-view]").forEach(function (el) {
+        el.addEventListener("click", function () {
+          var view = el.getAttribute("data-view");
+          document.querySelectorAll("[data-view]").forEach(function (n) {
+            n.classList.toggle("active", n.getAttribute("data-view") === view);
+          });
+        });
+      });
+    })();
+
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

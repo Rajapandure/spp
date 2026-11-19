@@ -1,19 +1,17 @@
 // Teacher & Admin CMS Module: Student Management, Content Workflow (Draft -> Review -> Approved -> Published), JSON/CSV Import, Completeness Tracker
 import { dbGet, dbGetAll, dbPut } from "../db/database.js";
 import { listAllStudentsForCMS, registerStudent, resetStudentPinByTeacher } from "../auth/auth.js";
-import { computeChapterCompleteness, CONTENT_STATUSES, validateCurriculumIntegrity } from "../curriculum/curriculumService.js";
-import { escapeHTML } from "../ui/sanitize.js";
+import { computeChapterCompleteness } from "../curriculum/curriculumService.js";
 import { ACADEMIC_SESSIONS, BOARDS, MEDIUMS } from "../config/classes.js";
 
 export async function renderCMSDashboardHTML(teacherProfile, activeTab = "content") {
-  const [students, books, chapters, questions, attempts, assessments, assignments, selfRegSetting] = await Promise.all([
+  const [students, books, chapters, questions, attempts, assessments, selfRegSetting] = await Promise.all([
     listAllStudentsForCMS(),
     dbGetAll("textbooks"),
     dbGetAll("chapters"),
     dbGetAll("questions"),
     dbGetAll("studentAttempts"),
     dbGetAll("assessments"),
-    dbGetAll("assignments"),
     dbGet("settings", "selfRegistrationEnabled")
   ]);
 
@@ -29,7 +27,7 @@ export async function renderCMSDashboardHTML(teacherProfile, activeTab = "conten
           <div style="font-size:0.85rem;color:var(--text-muted);">Manage student accounts, curriculum workflow (Draft → Review → Approved → Published), JSON/CSV import & descriptive exam grading.</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="sp-btn sp-btn-secondary" onclick="window.SP.exportFullJSON()">⬇️ Complete Backup JSON</button>
+          <button class="sp-btn sp-btn-secondary" onclick="window.SP.exportFullJSON()">⬇️ Export DB JSON</button>
           <button class="sp-btn sp-btn-danger" onclick="window.SP.logout()">Logout</button>
         </div>
       </div>
@@ -37,15 +35,13 @@ export async function renderCMSDashboardHTML(teacherProfile, activeTab = "conten
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
         <button class="sp-btn ${activeTab === "content" ? "sp-btn-primary" : "sp-btn-secondary"}" onclick="window.SP.setCMSTab('content')">📚 Curriculum & Workflow (${chapters.length})</button>
         <button class="sp-btn ${activeTab === "students" ? "sp-btn-primary" : "sp-btn-secondary"}" onclick="window.SP.setCMSTab('students')">👩‍🎓 Students (${students.length})</button>
-        <button class="sp-btn ${activeTab === "assignments" ? "sp-btn-primary" : "sp-btn-secondary"}" onclick="window.SP.setCMSTab('assignments')">📋 Assignments (${assignments.length})</button>
-        <button class="sp-btn ${activeTab === "import" ? "sp-btn-primary" : "sp-btn-secondary"}" onclick="window.SP.setCMSTab('import')">📥 Import / Restore</button>
+        <button class="sp-btn ${activeTab === "import" ? "sp-btn-primary" : "sp-btn-secondary"}" onclick="window.SP.setCMSTab('import')">📥 JSON / CSV Import</button>
         <button class="sp-btn ${activeTab === "exams" ? "sp-btn-primary" : "sp-btn-secondary"}" onclick="window.SP.setCMSTab('exams')">📄 Exam Papers (${assessments.length})</button>
         <button class="sp-btn ${activeTab === "grading" ? "sp-btn-primary" : "sp-btn-secondary"}" onclick="window.SP.setCMSTab('grading')">📝 Descriptive Grading (${pendingExams.length})</button>
       </div>
 
       ${activeTab === "content" ? renderCMSContentTab(books, chapters, questions) : ""}
       ${activeTab === "students" ? renderCMSStudentsTab(students, selfReg) : ""}
-      ${activeTab === "assignments" ? renderCMSAssignmentsTab(assignments) : ""}
       ${activeTab === "import" ? renderCMSImportTab() : ""}
       ${activeTab === "exams" ? renderCMSExamsTab(assessments, questions) : ""}
       ${activeTab === "grading" ? renderCMSGradingTab(pendingExams) : ""}
@@ -54,18 +50,8 @@ export async function renderCMSDashboardHTML(teacherProfile, activeTab = "conten
 }
 
 function renderCMSContentTab(books, chapters, questions) {
-  const valReport = validateCurriculumIntegrity(chapters, questions);
   return `
     <div style="display:grid;gap:16px;">
-      <div class="sp-card" style="padding:16px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-          <strong>🛡️ Curriculum Validation Report</strong>
-          <span class="sp-badge" style="background:${valReport.issues.length === 0 ? "#d1fae5" : "#fef3c7"};color:${valReport.issues.length === 0 ? "#065f46" : "#92400e"};">${valReport.issues.length} Issue(s) Detected</span>
-        </div>
-        <div style="font-size:0.84rem;color:var(--text-secondary);margin-top:6px;">
-          Chapters: <strong>${valReport.verifiedChapters}</strong> Verified · <strong>${valReport.generatedChapters}</strong> Generated Supplementary | Questions: <strong>${valReport.verifiedQuestions}</strong> Verified · <strong>${valReport.generatedQuestions}</strong> Generated Supplementary
-        </div>
-      </div>
       <div class="sp-card" style="padding:18px;">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
           <h3 style="margin:0;">Create / Publish Chapter</h3>
@@ -133,7 +119,7 @@ function renderCMSContentTab(books, chapters, questions) {
                 return `
                   <tr style="border-bottom:1px solid var(--border-subtle);">
                     <td style="padding:8px;">Class ${c.classNum} · ${c.board} · ${c.medium}</td>
-                    <td style="padding:8px;font-weight:700;">${escapeHTML(c.title)} <div style="font-size:11px;color:var(--text-muted);">${escapeHTML(c.verificationStatus || c.status)}</div></td>
+                    <td style="padding:8px;font-weight:700;">${c.title}</td>
                     <td style="padding:8px;">
                       <span style="font-weight:700;color:${comp.score >= 75 ? "#059669" : "#d97706"};">${comp.score}%</span>
                       <div style="font-size:11px;color:var(--text-muted);">${cQs.length} Qs ${comp.missing.length ? "· Missing: " + comp.missing.join(", ") : ""}</div>
@@ -141,7 +127,7 @@ function renderCMSContentTab(books, chapters, questions) {
                     <td style="padding:8px;"><span class="sp-badge" style="background:${badgeBg};color:${badgeCol};">${c.status}</span></td>
                     <td style="padding:8px;display:flex;gap:6px;flex-wrap:wrap;">
                       <select onchange="window.SP.updateChapterStatus('${c.id}', this.value)" class="sp-select" style="width:auto;padding:4px 8px;font-size:12px;">
-                        ${CONTENT_STATUSES.map((st) => `<option value="${st}" ${(c.verificationStatus || c.status) === st ? "selected" : ""}>${st}</option>`).join("")}
+                        ${["Draft", "Review", "Approved", "Published"].map((st) => `<option value="${st}" ${c.status === st ? "selected" : ""}>${st}</option>`).join("")}
                       </select>
                       <button class="sp-btn sp-btn-secondary" style="min-height:30px;padding:0 10px;font-size:12px;" onclick="window.SP.openCMSQuestionForm('${c.id}')">+ Q</button>
                       <button class="sp-btn sp-btn-secondary" style="min-height:30px;padding:0 10px;font-size:12px;" onclick="window.SP.openCMSExPlayEditor('${c.id}')">✏️ Ex/Playcards</button>
@@ -241,12 +227,6 @@ function renderCMSImportTab() {
         <button class="sp-btn sp-btn-secondary" onclick="window.SP.runCMSImport('csv')">Import CSV Questions</button>
       </div>
     </div>
-    <div class="sp-card" style="padding:18px;margin-top:16px;">
-      <h3 style="margin-top:0;">🔄 Complete Backup & Restore</h3>
-      <p style="font-size:0.86rem;color:var(--text-muted);">Select a <code>scholars-point-backup-*.json</code> file to preview, merge, or replace local data (creates an automatic safety backup before replacing).</p>
-      <input type="file" id="cmsBackupFileInput" accept=".json" class="sp-input" onchange="window.SP.previewBackupFile(event)" />
-      <div id="cmsBackupPreviewSlot" style="margin-top:12px;"></div>
-    </div>
   `;
 }
 
@@ -310,44 +290,6 @@ function renderCMSExamsTab(assessments, questions) {
           <div style="padding:10px 12px;border-radius:10px;background:var(--bg-muted);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
             <div><strong>${a.title}</strong> · Class ${a.classNum} · ${a.board} · ${a.medium} (${a.questions.length} Qs · ${Math.round(a.durationSec/60)} mins)</div>
             <button class="sp-btn sp-btn-danger" style="min-height:30px;font-size:12px;" onclick="window.SP.deleteCMSExamPaper('${a.id}')">Delete</button>
-          </div>
-        `).join("")}
-      </div>
-    </div>
-  `;
-}
-
-function renderCMSAssignmentsTab(assignments) {
-  return `
-    <div style="display:grid;gap:16px;">
-      <div class="sp-card" style="padding:18px;">
-        <h3 style="margin-top:0;">📋 Create Local Assignment / Homework</h3>
-        <p style="font-size:0.84rem;color:var(--text-muted);">Offline note: Assignments are stored locally on this device. Use Backup/Export to share across devices.</p>
-        <form onsubmit="window.SP.saveCMSAssignment(event)" style="display:grid;gap:10px;">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
-            <select id="cmsAsClass" class="sp-select">${Array.from({length:10},(_,i)=>`<option value="${i+1}">Class ${i+1}</option>`).join("")}</select>
-            <select id="cmsAsBoard" class="sp-select">${Object.values(BOARDS).map(b=>`<option value="${b.id}">${b.name}</option>`).join("")}</select>
-            <select id="cmsAsMedium" class="sp-select">${Object.values(MEDIUMS).map(m=>`<option value="${m.id}">${m.name}</option>`).join("")}</select>
-            <select id="cmsAsSession" class="sp-select">${ACADEMIC_SESSIONS.map(ss=>`<option value="${ss}">${ss}</option>`).join("")}</select>
-            <select id="cmsAsSubject" class="sp-select">
-              <option value="maths">Mathematics</option><option value="english">English</option><option value="grammar">English Grammar</option>
-              <option value="hindi">Hindi</option><option value="evs">EVS</option><option value="science">Science</option><option value="social">Social Science</option>
-            </select>
-          </div>
-          <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;">
-            <input id="cmsAsTitle" class="sp-input" placeholder="Assignment Title (e.g. Solve Ex 1.1 Questions 1-5)" required />
-            <input id="cmsAsDue" type="date" class="sp-input" required />
-          </div>
-          <textarea id="cmsAsDesc" class="sp-textarea" rows="2" placeholder="Instructions for students..." required></textarea>
-          <button type="submit" class="sp-btn sp-btn-success">✓ Save Assignment Locally</button>
-        </form>
-      </div>
-      <div class="sp-card" style="padding:18px;">
-        <h3 style="margin-top:0;">Saved Assignments (${assignments.length})</h3>
-        ${assignments.length === 0 ? `<p style="color:var(--text-muted);">No assignments created yet.</p>` : assignments.map(a => `
-          <div style="padding:10px 12px;border-radius:10px;background:var(--bg-muted);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
-            <div><strong>${escapeHTML(a.title)}</strong> · Class ${a.classNum} · ${a.board} · ${a.medium} · Due: ${a.dueDate}</div>
-            <button class="sp-btn sp-btn-danger" style="min-height:30px;font-size:12px;" onclick="window.SP.deleteCMSAssignment('${a.assignmentId}')">Delete</button>
           </div>
         `).join("")}
       </div>

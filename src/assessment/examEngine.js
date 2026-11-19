@@ -1,6 +1,5 @@
 // Mock Examination & Assessment Engine (20-Question Configurable, Save/Resume, Weak-Topic Analysis)
-import { dbDelete, dbGet, dbPut, dbQueryByIndex, recordLocalActivity } from "../db/database.js";
-import { awardActivityReward } from "../rewards/rewardService.js";
+import { dbDelete, dbGet, dbPut, dbQueryByIndex, enqueueSyncRecord } from "../db/database.js";
 
 export const EXAM_TEMPLATES = {
   chapter_test: { id: "chapter_test", label: "Chapter Assessment (10 Qs)", count: 10, durationMin: 15 },
@@ -126,20 +125,13 @@ export async function submitMockExam(studentProfile, paper, answersMap) {
   await dbPut("studentAttempts", attemptRecord);
   await clearExamDraft(studentProfile.studentId);
 
-  // Idempotent reward transaction (only if at least 1 objective answer was correct)
-  if (objectiveCorrect > 0) {
-    await awardActivityReward(studentProfile, {
-      activityType: "Mock Examination Completion",
-      subjectId: paper.subjectId || "",
-      chapterId: paper.chapterId || "",
-      xp: objectiveCorrect * 10,
-      coins: objectiveCorrect * 3,
-      idempotencyKey: `exam_reward::${attemptId}`,
-      note: `${paper.title} (${objectiveCorrect}/${objectiveTotal})`
-    });
-  }
+  // Reward XP
+  studentProfile.xp = (studentProfile.xp || 0) + objectiveCorrect * 10;
+  studentProfile.coins = (studentProfile.coins || 0) + objectiveCorrect * 3;
+  await dbPut("studentProfiles", studentProfile);
 
-  await recordLocalActivity(studentProfile.studentId, "exam_attempt", { attemptId, earnedObjectiveMarks, objectiveTotal }, attemptId);
+  // Queue for sync with idempotencyKey = attemptId (prevents duplicate records)
+  await enqueueSyncRecord(studentProfile.studentId, "exam_attempt", { attemptId, earnedObjectiveMarks, objectiveTotal }, attemptId);
 
   return attemptRecord;
 }

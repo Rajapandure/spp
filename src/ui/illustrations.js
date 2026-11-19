@@ -1,4 +1,3 @@
-import { SP_ASSETS } from "./assets.js";
 // Original Offline SVG Illustration & Diagram System (Zero External Assets)
 
 export function renderAvatarSVG(avatarId, size = 44) {
@@ -15,19 +14,6 @@ export function renderAvatarSVG(avatarId, size = 44) {
 }
 
 export function renderSubjectSVG(subjectKey, size = 48) {
-  const imgMap = {
-    maths: SP_ASSETS.sub_maths,
-    science: SP_ASSETS.sub_science,
-    evs: SP_ASSETS.sub_science,
-    english: SP_ASSETS.sub_english,
-    grammar: SP_ASSETS.sub_english,
-    hindi: SP_ASSETS.sub_hindi,
-    sanskrit: SP_ASSETS.sub_hindi,
-    social: SP_ASSETS.sub_social
-  };
-  if (imgMap[subjectKey]) {
-    return `<img src="${imgMap[subjectKey]}" alt="${subjectKey}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;object-fit:contain;border-radius:12px;flex-shrink:0;" />`;
-  }
   const icons = {
     maths: `<rect width="48" height="48" rx="14" fill="#dbeafe"/><rect x="11" y="11" width="26" height="26" rx="6" fill="#2563eb"/><text x="17" y="23" fill="#fff" font-size="11" font-weight="800">+</text><text x="27" y="23" fill="#fff" font-size="11" font-weight="800">÷</text><text x="17" y="33" fill="#93c5fd" font-size="11" font-weight="800">×</text><text x="27" y="33" fill="#93c5fd" font-size="11" font-weight="800">=</text>`,
     english: `<rect width="48" height="48" rx="14" fill="#fce7f3"/><path d="M12 14 C12 12 20 12 24 15 C28 12 36 12 36 14 L36 34 C36 34 28 32 24 35 C20 32 12 34 12 34 Z" fill="#db2777"/><line x1="24" y1="15" x2="24" y2="35" stroke="#fbcfe8" stroke-width="2"/><text x="15" y="26" fill="#fff" font-size="9" font-weight="800">A</text><text x="27" y="26" fill="#fff" font-size="9" font-weight="800">Z</text>`,
@@ -79,67 +65,4 @@ export function renderConceptDiagramSVG(diagramType) {
     </svg>`;
   }
   return "";
-}
-
-export function renderAchievementBadgeSVG(badgeId, unlocked = true, size = 48) {
-  const bImg = {
-    welcome_scholar: SP_ASSETS.badge_star,
-    lesson_starter: SP_ASSETS.badge_medal,
-    streak_hero: SP_ASSETS.badge_crown,
-    quiz_master: SP_ASSETS.badge_trophy,
-    book_explorer: SP_ASSETS.badge_rocket
-  }[badgeId];
-  if (bImg) return `<img src="${bImg}" alt="${badgeId}" style="width:${size}px;height:${size}px;object-fit:contain;${unlocked ? "" : "opacity:0.4;filter:grayscale(1);"}" />`;
-  const badges = {
-    welcome_scholar: { bg: "#dbeafe", ring: "#2563eb", icon: `<polygon points="24,10 28,19 38,20 30,27 32,37 24,32 16,37 18,27 10,20 20,19" fill="#f59e0b"/>` },
-    lesson_starter: { bg: "#d1fae5", ring: "#059669", icon: `<path d="M15 16 H33 V32 H15 Z" fill="#10b981" rx="3"/><path d="M19 24 L23 28 L30 20" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>` },
-    streak_hero: { bg: "#ffedd5", ring: "#ea580c", icon: `<path d="M24 10 C29 17 33 22 31 30 C29 35 19 35 17 30 C15 24 20 19 24 10 Z" fill="#f97316"/><circle cx="24" cy="27" r="3.5" fill="#fef08a"/>` },
-    quiz_master: { bg: "#ede9fe", ring: "#7c3aed", icon: `<circle cx="24" cy="22" r="9" fill="#8b5cf6"/><path d="M18 30 L16 39 L24 35 L32 39 L30 30" fill="#a78bfa"/>` },
-    book_explorer: { bg: "#fce7f3", ring: "#db2777", icon: `<path d="M14 15 C18 14 22 15 24 17 C26 15 30 14 34 15 V33 C30 32 26 33 24 35 C22 33 18 32 14 33 Z" fill="#ec4899"/>` }
-  };
-  const b = badges[badgeId] || badges.welcome_scholar;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="${b.bg}" stroke="${unlocked ? b.ring : "#94a3b8"}" stroke-width="2.5"/>${b.icon}</svg>`;
-}
-
-export function renderGradCapSVG(size = 34) {
-  if (SP_ASSETS.logo) return `<img src="${SP_ASSETS.logo}" alt="Scholars Point" style="width:${Math.round(size*1.45)}px;height:${size}px;object-fit:contain;flex-shrink:0;" />`;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 48 48" aria-hidden="true"><polygon points="24,8 44,18 24,28 4,18" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"/><path d="M12 22 V32 C12 36 36 36 36 32 V22 L24 28 Z" fill="#f59e0b"/><line x1="40" y1="20" x2="40" y2="32" stroke="#fef08a" stroke-width="2.5" stroke-linecap="round"/><circle cx="40" cy="33" r="2.5" fill="#fef08a"/></svg>`;
-}
-
-export function renderScholarHeroSVG(size = 110) {
-  if (SP_ASSETS.scholar_boy) return `<img src="${SP_ASSETS.scholar_boy}" alt="Scholar" style="width:${size}px;height:${size}px;object-fit:contain;border-radius:16px;flex-shrink:0;" />`;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 120 120" aria-hidden="true">
-    <circle cx="60" cy="60" r="54" fill="#fde68a" opacity="0.45"/>
-    <path d="M36 96 C36 74 84 74 84 96 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
-    <path d="M46 78 L60 92 L74 78" fill="#2563eb"/>
-    <circle cx="60" cy="48" r="24" fill="#fed7aa"/>
-    <path d="M36 44 C36 24 84 24 84 44 C80 34 68 30 60 32 C50 30 40 34 36 44 Z" fill="#33180c"/>
-    <circle cx="51" cy="48" r="3" fill="#1e293b"/><circle cx="69" cy="48" r="3" fill="#1e293b"/>
-    <circle cx="52" cy="47" r="1" fill="#fff"/><circle cx="70" cy="47" r="1" fill="#fff"/>
-    <path d="M52 57 Q60 65 68 57" stroke="#9a3412" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-    <circle cx="44" cy="54" r="3.5" fill="#fb7185" opacity="0.45"/><circle cx="76" cy="54" r="3.5" fill="#fb7185" opacity="0.45"/>
-    <path d="M30 82 L22 58" stroke="#fed7aa" stroke-width="8" stroke-linecap="round"/>
-    <circle cx="21" cy="54" r="6" fill="#fed7aa"/>
-  </svg>`;
-}
-
-export function renderTrophySVG(size = 86) {
-  if (SP_ASSETS.badge_trophy) return `<img src="${SP_ASSETS.badge_trophy}" alt="Trophy" style="width:${size}px;height:${size}px;object-fit:contain;flex-shrink:0;" />`;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 96 96" aria-hidden="true">
-    <path d="M26 22 H70 V42 C70 56 58 64 48 64 C38 64 26 56 26 42 Z" fill="#fbbf24" stroke="#d97706" stroke-width="2"/>
-    <path d="M26 26 H16 C14 26 14 44 26 44" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
-    <path d="M70 26 H80 C82 26 82 44 70 44" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
-    <rect x="43" y="64" width="10" height="12" fill="#d97706"/>
-    <rect x="30" y="76" width="36" height="8" rx="4" fill="#b45309"/>
-    <polygon points="48,30 51,38 59,38 53,43 55,51 48,46 41,51 43,43 37,38 45,38" fill="#fef08a"/>
-    <circle cx="20" cy="18" r="2.5" fill="#fef08a"/><circle cx="78" cy="16" r="3" fill="#fef08a"/><circle cx="82" cy="58" r="2" fill="#fde68a"/>
-  </svg>`;
-}
-
-export function renderOpenBookSVG(size = 44) {
-  return `<svg width="${size}" height="${size}" viewBox="0 0 48 48" aria-hidden="true"><path d="M6 12 C12 10 20 12 24 16 C28 12 36 10 42 12 V36 C36 34 28 36 24 39 C20 36 12 34 6 36 Z" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/><line x1="24" y1="16" x2="24" y2="39" stroke="#3b82f6" stroke-width="2"/><line x1="11" y1="19" x2="19" y2="20" stroke="#93c5fd" stroke-width="2"/><line x1="11" y1="25" x2="19" y2="26" stroke="#93c5fd" stroke-width="2"/><line x1="29" y1="20" x2="37" y2="19" stroke="#93c5fd" stroke-width="2"/><line x1="29" y1="26" x2="37" y2="25" stroke="#93c5fd" stroke-width="2"/></svg>`;
-}
-
-export function renderClipboardSVG(size = 44) {
-  return `<svg width="${size}" height="${size}" viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="8" width="28" height="34" rx="5" fill="#ffffff" stroke="#64748b" stroke-width="2"/><rect x="18" y="4" width="12" height="7" rx="3" fill="#3b82f6"/><line x1="16" y1="19" x2="32" y2="19" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="26" x2="32" y2="26" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="33" x2="25" y2="33" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/><path d="M31 31 L39 23 L42 26 L34 34 Z" fill="#f59e0b"/></svg>`;
 }

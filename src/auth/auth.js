@@ -1,6 +1,4 @@
 // Authentication, Salted SHA-256 Hashing, Session Persistence & Account Isolation
-// SECURITY NOTE: Local PIN/password authentication and IndexedDB storage are client-side only
-// and are NOT equivalent to server-side authentication or encrypted database storage.
 import { dbGet, dbGetAll, dbPut, dbQueryByIndex } from "../db/database.js";
 
 const SESSION_KEY = "sp_active_session_v7";
@@ -130,11 +128,10 @@ export async function registerStudent({
     session,
     schoolName: schoolName.trim(),
     avatar,
-    coins: 0,
+    coins: 50,
     xp: 0,
-    streak: 0,
-    lastLearningDate: null,
-    streakHistory: [],
+    streak: 1,
+    lastActiveDate: new Date().toISOString().slice(0, 10),
     achievements: ["welcome_scholar"],
     dailyActivity: {},
     status: "active",
@@ -174,7 +171,14 @@ export async function loginStudent(identifier, pinOrPassword, isOfflineMode = !n
   const profile = await dbGet("studentProfiles", user.studentId);
   if (!profile) throw new Error("Student profile record missing.");
 
-  // Login alone must NOT increment learning streak; streaks update only on learning activities.
+  // Update streak
+  const today = new Date().toISOString().slice(0, 10);
+  if (profile.lastActiveDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    profile.streak = profile.lastActiveDate === yesterday ? (profile.streak || 0) + 1 : 1;
+    profile.lastActiveDate = today;
+    await dbPut("studentProfiles", profile);
+  }
 
   const sessionObj = {
     role: "student",

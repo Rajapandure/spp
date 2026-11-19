@@ -1,8 +1,8 @@
-// Offline-First IndexedDB Engine (ScholarsPointDB_v7, Schema v2)
-// Enforces strict studentId isolation and honest local-first persistence (no fake cloud sync).
+// Offline-First IndexedDB Engine (ScholarsPointDB_v7)
+// Enforces strict studentId isolation for all personal learning records.
 
 const DB_NAME = "ScholarsPointDB_v7";
-const DB_VERSION = 2;
+const DB_VERSION = 1;
 
 export const STORES = {
   users: { keyPath: "userId", indexes: ["username", "role", "studentId"] },
@@ -10,21 +10,18 @@ export const STORES = {
   teacherProfiles: { keyPath: "teacherId", indexes: ["userId"] },
   sessions: { keyPath: "id" },
   subjects: { keyPath: "id", indexes: ["board", "medium", "classNum"] },
-  textbooks: { keyPath: "id", indexes: ["board", "medium", "classNum", "subjectId", "status", "session"] },
-  chapters: { keyPath: "id", indexes: ["bookId", "board", "medium", "classNum", "subjectId", "status", "verificationStatus"] },
-  questions: { keyPath: "id", indexes: ["chapterId", "bookId", "board", "medium", "classNum", "subjectId", "type", "difficulty", "verificationStatus"] },
+  textbooks: { keyPath: "id", indexes: ["board", "medium", "classNum", "subjectId", "status"] },
+  chapters: { keyPath: "id", indexes: ["bookId", "board", "medium", "classNum", "subjectId", "status"] },
+  questions: { keyPath: "id", indexes: ["chapterId", "bookId", "board", "medium", "classNum", "subjectId", "type", "difficulty"] },
   games: { keyPath: "id", indexes: ["chapterId", "classNum", "subjectId"] },
-  assessments: { keyPath: "id", indexes: ["board", "medium", "classNum", "subjectId", "session"] },
+  assessments: { keyPath: "id", indexes: ["board", "medium", "classNum", "subjectId"] },
   studentAttempts: { keyPath: "attemptId", indexes: ["studentId", "chapterId", "assessmentId", "type"] },
-  studentProgress: { keyPath: "progressId", indexes: ["studentId", "chapterId", "subjectId"] },
-  wrongAnswers: { keyPath: "id", indexes: ["studentId", "chapterId", "questionId"] },
-  bookmarks: { keyPath: "id", indexes: ["studentId", "chapterId"] },
+  studentProgress: { keyPath: "progressId", indexes: ["studentId", "chapterId", "subjectId"] }, // progressId = `${studentId}::${chapterId}`
+  wrongAnswers: { keyPath: "id", indexes: ["studentId", "chapterId", "questionId"] }, // id = `${studentId}::${questionId}`
+  bookmarks: { keyPath: "id", indexes: ["studentId", "chapterId"] }, // id = `${studentId}::${chapterId}`
   highlights: { keyPath: "id", indexes: ["studentId", "chapterId"] },
   offlinePacks: { keyPath: "packId", indexes: ["bookId", "chapterId"] },
   syncQueue: { keyPath: "syncId", indexes: ["studentId", "status", "idempotencyKey"] },
-  rewardTransactions: { keyPath: "txId", indexes: ["studentId", "idempotencyKey", "activityType"] },
-  assignments: { keyPath: "assignmentId", indexes: ["classNum", "board", "medium", "session", "subjectId"] },
-  revisions: { keyPath: "revisionId", indexes: ["studentId", "status", "revisionDate"] },
   settings: { keyPath: "key" }
 };
 
@@ -119,17 +116,7 @@ export async function dbDelete(storeName, key) {
   });
 }
 
-export async function dbClearStore(storeName) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, "readwrite");
-    const req = tx.objectStore(storeName).clear();
-    req.onsuccess = () => resolve(true);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-// Strict Student Isolation Helpers
+// Strict Student Isolation Helpers — always require explicit studentId
 export async function getStudentProgressMap(studentId) {
   if (!studentId) throw new Error("Student isolation violation: studentId required");
   const rows = await dbQueryByIndex("studentProgress", "studentId", studentId);
@@ -159,44 +146,35 @@ export async function getStudentHighlights(studentId, chapterId) {
   return chapterId ? rows.filter((h) => h.chapterId === chapterId) : rows;
 }
 
-export async function getStudentRewardTransactions(studentId) {
-  if (!studentId) throw new Error("Student isolation violation: studentId required");
-  return dbQueryByIndex("rewardTransactions", "studentId", studentId);
-}
-
-export async function getStudentRevisions(studentId) {
-  if (!studentId) throw new Error("Student isolation violation: studentId required");
-  return dbQueryByIndex("revisions", "studentId", studentId);
-}
-
-// Honest Local-First Activity Persistence (replaces misleading remote-sync statuses)
-export async function recordLocalActivity(studentId, entityType, payload, idempotencyKey) {
+// Idempotent Sync Queue Helper (prevents duplicate records on reconnect)
+export async function enqueueSyncRecord(studentId, entityType, payload, idempotencyKey) {
   const existing = await dbQueryByIndex("syncQueue", "idempotencyKey", idempotencyKey);
   if (existing.length > 0) return existing[0];
   const record = {
-    syncId: "act_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+    syncId: "sync_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
     studentId,
     entityType,
     payload,
     idempotencyKey,
-    status: "Saved Locally",
-    createdAt: new Date().toISOString()
+    status: navigator.onLine ? "synced" : "pending",
+    createdAt: new Date().toISOString(),
+    syncedAt: navigator.onLine ? new Date().toISOString() : null
   };
   await dbPut("syncQueue", record);
   return record;
 }
 
-// Backward-compatible alias that never fabricates cloud synchronization
-export async function enqueueSyncRecord(studentId, entityType, payload, idempotencyKey) {
-  return recordLocalActivity(studentId, entityType, payload, idempotencyKey);
-}
-
-export async function getLocalPersistenceSummary(studentId) {
+export async function flushPendingSync(studentId) {
+  if (!navigator.onLine) return { synced: 0, pending: (await dbQueryByIndex("syncQueue", "studentId", studentId)).filter(s => s.status === "pending").length };
   const all = await dbQueryByIndex("syncQueue", "studentId", studentId);
-  const lastBackup = await dbGet("settings", "last_backup_timestamp");
-  return {
-    savedLocallyCount: all.length,
-    statusLabel: lastBackup ? "Backup Available" : "Backup Required",
-    lastBackupAt: lastBackup ? lastBackup.value : null
-  };
+  let synced = 0;
+  for (const item of all) {
+    if (item.status === "pending") {
+      item.status = "synced";
+      item.syncedAt = new Date().toISOString();
+      await dbPut("syncQueue", item);
+      synced++;
+    }
+  }
+  return { synced, pending: 0 };
 }

@@ -372,88 +372,119 @@ function buildChapterSpecificContent(classNum, sub, medium, chTitle) {
 }
 
 
-function buildChapterVariedPracticeAndExercises(ch) {
+function buildSubjectSpecificProblems(ch) {
   const c = Number(ch.classNum);
-  const seq = Number(ch.sequence) || 1;
   const sub = ch.subjectId;
   const isHi = ch.medium === "HI" || sub === "hindi" || sub === "sanskrit";
   const clean = ch.title.replace(/^\d+\.\s*/, "");
 
   if (sub === "maths") {
-    const a = c * 3 + seq * 2;
-    const b = c * 2 + seq + 1;
-    const prod = a * b;
-    const sum = a + b;
-    const diff = Math.abs(a - b) + 4;
-    const practiceQs = [
-      { q: isHi ? `(${clean}) ${a} + ${b} का मान ज्ञात करें:` : `(${clean}) Calculate: ${a} + ${b}`, options: [String(sum - 2), String(sum), String(sum + 2), String(sum + 4)], ans: String(sum), exp: `${a} + ${b} = ${sum}.` },
-      { q: isHi ? `(${clean}) ${a} × ${b} बराबर है:` : `(${clean}) Find the product: ${a} × ${b}`, options: [String(prod - a), String(prod), String(prod + b), String(prod + a)], ans: String(prod), exp: `${a} × ${b} = ${prod}.` },
-      { q: isHi ? `(${clean}) यदि x + ${b} = ${sum} है, तो x = ___` : `(${clean}) If x + ${b} = ${sum}, then x = ___`, options: [], ans: String(a), exp: `x = ${sum} - ${b} = ${a}.` },
-      { q: isHi ? `(${clean}) ${a * 2} और ${b * 2} का योग एक सम संख्या है।` : `(${clean}) The sum of ${a * 2} and ${b * 2} is an even number.`, options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", exp: "The sum of two even numbers is always even." }
+    if (c <= 2) {
+      return [
+        { q: isHi ? "7 + 5 का योग क्या होगा?" : "What is 7 + 5?", options: ["10", "11", "12", "13"], ans: "12", exp: "7 + 5 = 12." },
+        { q: isHi ? "15 - 6 बराबर है:" : "What is 15 - 6?", options: ["8", "9", "10", "7"], ans: "9", exp: "15 - 6 = 9." },
+        { q: isHi ? "3 दहाई और 8 इकाई से कौन-सी संख्या बनेगी?" : "Write the number for 3 tens and 8 ones.", options: ["38", "83", "11", "30"], ans: "38", exp: "30 + 8 = 38." },
+        { q: isHi ? "कौन-सी आकृति में 4 बराबर भुजाएँ होती हैं?" : "Which shape has 4 equal sides?", options: ["Circle", "Triangle", "Square", "Oval"], ans: "Square", exp: "A square has 4 equal sides." },
+        { q: isHi ? "20 में से 8 घटाने पर क्या बचेगा?" : "Subtract 8 from 20:", options: ["10", "12", "14", "11"], ans: "12", exp: "20 - 8 = 12." },
+        { q: isHi ? "9 + 9 = ___" : "Fill in the blank: 9 + 9 = ___", options: [], ans: "18", exp: "9 + 9 = 18." },
+        { q: isHi ? "एक सप्ताह में 7 दिन होते हैं।" : "There are 7 days in a week.", options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", exp: "A week has 7 days." },
+        { q: isHi ? "सबसे छोटी दो अंकों की संख्या कौन-सी है?" : "Which is the smallest 2-digit number?", options: ["9", "10", "11", "99"], ans: "10", exp: "10 is the smallest 2-digit number." }
+      ];
+    }
+    if (c <= 5) {
+      return [
+        { q: isHi ? "24 × 5 का मान ज्ञात करें:" : "Find the product: 24 × 5", options: ["100", "110", "120", "125"], ans: "120", exp: "24 × 5 = 120." },
+        { q: isHi ? "144 ÷ 12 बराबर है:" : "Divide 144 by 12:", options: ["10", "11", "12", "14"], ans: "12", exp: "12 × 12 = 144." },
+        { q: isHi ? "12 मी लंबाई और 6 मी चौड़ाई वाले आयत का परिमाप:" : "Perimeter of a rectangle of length 12 m and breadth 6 m:", options: ["18 m", "36 m", "72 m", "24 m"], ans: "36 m", exp: "2 × (12 + 6) = 36 m." },
+        { q: isHi ? "3/4 और 6/8 तुल्य भिन्न हैं।" : "3/4 and 6/8 are equivalent fractions.", options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", exp: "(3×2)/(4×2) = 6/8." },
+        { q: isHi ? "1 किलोग्राम में ___ ग्राम होते हैं।" : "1 kilogram = ___ grams.", options: [], ans: "1000", exp: "1 kg = 1000 g." },
+        { q: isHi ? "450 + 375 का योग:" : "Add 450 + 375:", options: ["815", "825", "725", "835"], ans: "825", exp: "450 + 375 = 825." },
+        { q: isHi ? "एक समकोण का माप कितना होता है?" : "What is the measure of a right angle?", options: ["45°", "90°", "180°", "60°"], ans: "90°", exp: "A right angle measures 90°." },
+        { q: isHi ? "1000 - 345 का मान:" : "Subtract 345 from 1000:", options: ["655", "665", "755", "645"], ans: "655", exp: "1000 - 345 = 655." }
+      ];
+    }
+    if (c <= 8) {
+      return [
+        { q: isHi ? "समीकरण 3x - 5 = 16 में x का मान ज्ञात करें:" : "Solve for x: 3x - 5 = 16", options: ["5", "6", "7", "8"], ans: "7", exp: "3x = 21 → x = 7." },
+        { q: isHi ? "(-12) × (-4) का मान:" : "Evaluate: (-12) × (-4)", options: ["-48", "48", "-16", "16"], ans: "48", exp: "Product of two negative integers is positive: 48." },
+        { q: isHi ? "196 का वर्गमूल (√196) क्या है?" : "What is the square root of 196?", options: ["12", "13", "14", "16"], ans: "14", exp: "14 × 14 = 196." },
+        { q: isHi ? "किसी त्रिभुज के तीनों कोणों का योग 180° होता है।" : "The sum of angles of any triangle is 180°.", options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", exp: "Angle sum property of a triangle = 180°." },
+        { q: isHi ? "2⁵ ÷ 2² का मान 2^___ होगा।" : "2⁵ ÷ 2² = 2^___ (write exponent).", options: [], ans: "3", exp: "Using a^m ÷ a^n = a^(m-n): 5 - 2 = 3." },
+        { q: isHi ? "25% को सरल भिन्न के रूप में लिखें:" : "Express 25% as a fraction in lowest form:", options: ["1/2", "1/4", "1/5", "3/4"], ans: "1/4", exp: "25/100 = 1/4." },
+        { q: isHi ? "7 सेमी त्रिज्या वाले वृत्त का व्यास:" : "Diameter of a circle of radius 7 cm is:", options: ["7 cm", "14 cm", "21 cm", "44 cm"], ans: "14 cm", exp: "Diameter = 2 × radius = 14 cm." },
+        { q: isHi ? "(x + 3)(x - 3) का प्रसार:" : "Expand (x + 3)(x - 3):", options: ["x² - 9", "x² + 9", "x² - 6x + 9", "x² - 3"], ans: "x² - 9", exp: "(a + b)(a - b) = a² - b² = x² - 9." }
+      ];
+    }
+    // Classes 9-10
+    return [
+      { q: isHi ? "यदि बहुपद p(x) = x² - 5x + 6 है, तो p(2) का मान:" : "If p(x) = x² - 5x + 6, find p(2):", options: ["0", "2", "4", "-2"], ans: "0", exp: "p(2) = 4 - 10 + 6 = 0." },
+      { q: isHi ? "द्विघात समीकरण x² - 9 = 0 के मूल हैं:" : "Roots of quadratic equation x² - 9 = 0 are:", options: ["±3", "±9", "3 only", "0, 3"], ans: "±3", exp: "x² = 9 → x = +3 or -3." },
+      { q: isHi ? "समान्तर श्रेढ़ी 2, 5, 8, 11, ... का सार्व अंतर (d):" : "Common difference (d) of the AP 2, 5, 8, 11, ... is:", options: ["2", "3", "4", "5"], ans: "3", exp: "d = 5 - 2 = 3." },
+      { q: isHi ? "sin²θ + cos²θ = 1 सभी θ के लिए सत्य है।" : "sin²θ + cos²θ = 1 holds for all real θ.", options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", exp: "Fundamental Pythagorean trigonometric identity." },
+      { q: isHi ? "एक पासे को फेंकने पर 4 से बड़ी संख्या आने की प्रायिकता:" : "Probability of getting a number greater than 4 on a fair die:", options: ["1/2", "1/3", "1/6", "2/3"], ans: "1/3", exp: "Favourable: {5, 6} (2 outcomes) out of 6 → 2/6 = 1/3." },
+      { q: isHi ? "बिंदु (3, 4) की मूल बिंदु (0, 0) से दूरी ___ इकाई है।" : "Distance of point (3, 4) from origin (0, 0) is ___ units.", options: [], ans: "5", exp: "√(3² + 4²) = √25 = 5." },
+      { q: isHi ? "6 सेमी त्रिज्या वाले वृत्त का क्षेत्रफल (π के पदों में):" : "Area of a circle of radius 6 cm in terms of π:", options: ["12π cm²", "36π cm²", "6π cm²", "24π cm²"], ans: "36π cm²", exp: "Area = πr² = π(6)² = 36π cm²." },
+      { q: isHi ? "HCF(18, 24) और LCM(18, 24) का गुणनफल:" : "Product of HCF(18, 24) and LCM(18, 24) is:", options: ["42", "432", "72", "216"], ans: "432", exp: "HCF × LCM = 18 × 24 = 432." }
     ];
-    const bookExercises = [
-      { qNo: "Ex 1", marks: 2, q: isHi ? `${clean}: ${prod} को अभाज्य गुणनखंडों या चरणबद्ध विधि से हल करें तथा उत्तर की जाँच करें।` : `${clean}: Find the perimeter of a rectangle with length ${a} cm and breadth ${b} cm.`, hint: isHi ? "सूत्र का प्रयोग करें।" : "Perimeter = 2 × (Length + Breadth).", ans: isHi ? `${a} × ${b} = ${prod}` : `${2 * (a + b)} cm`, steps: isHi ? `1. ${a} × ${b} = ${prod}` : `1. L = ${a} cm, B = ${b} cm\n2. P = 2 × (${a} + ${b}) = ${2 * (a + b)} cm.` },
-      { qNo: "Ex 2", marks: 3, q: isHi ? `${clean}: यदि किसी वर्ग की भुजा ${diff} सेमी है, तो उसका क्षेत्रफल और परिमाप ज्ञात करें।` : `${clean}: A square has side ${diff} cm. Find both its perimeter and area.`, hint: "Perimeter = 4 × side, Area = side × side.", ans: `Perimeter = ${4 * diff} cm, Area = ${diff * diff} cm²`, steps: `1. Perimeter = 4 × ${diff} = ${4 * diff} cm\n2. Area = ${diff} × ${diff} = ${diff * diff} cm².` }
-    ];
-    return { practiceQs, bookExercises };
   }
 
   if (sub === "science" || sub === "evs") {
-    const sciBank = [
-      { q: isHi ? `(${clean}) प्रकाश संश्लेषण के लिए कौन-सी गैस आवश्यक है?` : `(${clean}) Which gas is absorbed by plants during photosynthesis?`, options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"], ans: "Carbon dioxide", exp: "Plants absorb CO₂ and release O₂." },
-      { q: isHi ? `(${clean}) बल का SI मात्रक ___ है।` : `(${clean}) The SI unit of Force is ___.`, options: [], ans: "Newton", exp: "Force is measured in Newtons (N)." },
-      { q: isHi ? `(${clean}) शुद्ध जल का क्वथनांक 100°C होता है।` : `(${clean}) Pure water boils at 100°C at standard pressure.`, options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", exp: "100°C (373 K) is the boiling point of water." },
-      { q: isHi ? `(${clean}) अम्ल नीले लिटमस को किस रंग में बदलते हैं?` : `(${clean}) Acids turn blue litmus paper to:`, options: ["Red", "Green", "Yellow", "Blue"], ans: "Red", exp: "Acids turn blue litmus red." }
+    return [
+      { q: isHi ? `(${clean}) शुद्ध जल का क्वथनांक कितना होता है?` : `(${clean}) What is the boiling point of pure water at 1 atm?`, options: ["0°C", "50°C", "100°C", "212°C"], ans: "100°C", exp: "Pure water boils at 100°C (373 K)." },
+      { q: isHi ? `(${clean}) बल का SI मात्रक क्या है?` : `(${clean}) What is the SI unit of Force?`, options: ["Joule", "Watt", "Newton", "Pascal"], ans: "Newton", exp: "Force is measured in Newtons (N)." },
+      { q: isHi ? `(${clean}) श्वसन एक ऊष्माक्षेपी (Exothermic) प्रक्रिया है।` : `(${clean}) Respiration is an exothermic process.`, options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", exp: "Respiration releases energy by oxidizing glucose." },
+      { q: isHi ? `(${clean}) कोशिका की खोज किसने की थी?` : `(${clean}) Who discovered the cell in 1665?`, options: ["Robert Hooke", "Isaac Newton", "Charles Darwin", "Louis Pasteur"], ans: "Robert Hooke", exp: "Robert Hooke observed cork cells in 1665." },
+      { q: isHi ? `(${clean}) चुंबक के ___ ध्रुव एक-दूसरे को आकर्षित करते हैं।` : `(${clean}) Unlike poles of two magnets ___ each other.`, options: [], ans: isHi ? "असमान" : "attract", exp: "North and South poles attract; like poles repel." },
+      { q: isHi ? `(${clean}) मनुष्य में सामान्य शरीर का तापमान लगभग कितना होता है?` : `(${clean}) Normal human body temperature is approximately:`, options: ["37°C", "98°C", "25°C", "100°C"], ans: "37°C", exp: "Normal body temperature is 37°C (98.6°F)." },
+      { q: isHi ? `(${clean}) अम्ल नीले लिटमस को किस रंग में बदलते हैं?` : `(${clean}) Acids turn blue litmus paper:`, options: ["Green", "Red", "Yellow", "Black"], ans: "Red", exp: "Acids turn blue litmus red; bases turn red litmus blue." },
+      { q: isHi ? `(${clean}) ध्वनि निर्वात (Vacuum) में यात्रा नहीं कर सकती।` : `(${clean}) Sound cannot travel through a vacuum.`, options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", exp: "Sound is a mechanical wave and needs a medium." }
     ];
-    const start = (seq - 1) % sciBank.length;
-    const rotated = [...sciBank.slice(start), ...sciBank.slice(0, start)].slice(0, 3);
-    const bookExercises = [
-      { qNo: "Ex 1", marks: 2, q: isHi ? `${clean}: इस अध्याय की प्रमुख वैज्ञानिक प्रक्रिया का उदाहरण सहित वर्णन करें।` : `${clean}: Explain the key scientific principle in "${clean}" with one everyday example.`, hint: "Connect observation to scientific cause.", ans: `Scientific principle and daily-life example of ${clean}.`, steps: `1. Define ${clean}.\n2. Give one observed example.` }
-    ];
-    return { practiceQs: rotated, bookExercises };
   }
 
   if (sub === "social") {
-    const socBank = [
-      { q: isHi ? `(${clean}) भारत में मतदाता की न्यूनतम आयु ___ वर्ष है।` : `(${clean}) Minimum voting age in India is ___ years.`, options: [], ans: "18", exp: "Universal adult franchise in India starts at 18." },
-      { q: isHi ? `(${clean}) 0° अक्षांश रेखा को क्या कहते हैं?` : `(${clean}) The 0° latitude line is called:`, options: ["Equator", "Prime Meridian", "Tropic of Cancer", "Arctic Circle"], ans: "Equator", exp: "Equator divides Earth into North and South." },
-      { q: isHi ? `(${clean}) कर्क रेखा भारत के 8 राज्यों से गुजरती है।` : `(${clean}) The Tropic of Cancer passes through 8 Indian states.`, options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", exp: "It passes through 8 states including MP." }
+    return [
+      { q: isHi ? `(${clean}) कर्क रेखा भारत के कितने राज्यों से गुजरती है?` : `(${clean}) Through how many Indian states does the Tropic of Cancer pass?`, options: ["6", "7", "8", "9"], ans: "8", exp: "It passes through 8 Indian states including Madhya Pradesh." },
+      { q: isHi ? `(${clean}) भारतीय संविधान के प्रारूप समिति के अध्यक्ष कौन थे?` : `(${clean}) Who was the Chairman of the Drafting Committee of the Indian Constitution?`, options: ["Dr. B.R. Ambedkar", "Mahatma Gandhi", "Jawaharlal Nehru", "Sardar Patel"], ans: "Dr. B.R. Ambedkar", exp: "Dr. B.R. Ambedkar chaired the Drafting Committee." },
+      { q: isHi ? `(${clean}) भारत एक लोकतांत्रिक गणराज्य है।` : `(${clean}) India is a democratic republic.`, options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", exp: "Citizens elect their representatives and the head of state is elected." },
+      { q: isHi ? `(${clean}) पृथ्वी का सबसे बड़ा महासागर कौन-सा है?` : `(${clean}) Which is the largest ocean on Earth?`, options: ["Atlantic Ocean", "Indian Ocean", "Pacific Ocean", "Arctic Ocean"], ans: "Pacific Ocean", exp: "The Pacific Ocean is the largest and deepest ocean." },
+      { q: isHi ? `(${clean}) भारत में मतदाता बनने की न्यूनतम आयु ___ वर्ष है।` : `(${clean}) Minimum voting age in India is ___ years.`, options: [], ans: "18", exp: "Universal adult franchise in India starts at 18 years." },
+      { q: isHi ? `(${clean}) विश्व की सबसे लंबी पर्वत श्रृंखला कौन-सी है?` : `(${clean}) Which plateau is known as the Roof of the World?`, options: ["Deccan Plateau", "Tibetan Plateau", "Chotanagpur Plateau", "Malwa Plateau"], ans: "Tibetan Plateau", exp: "The Tibetan Plateau is the highest and largest plateau." }
     ];
-    const start = (seq - 1) % socBank.length;
-    const rotated = [...socBank.slice(start), ...socBank.slice(0, start)].slice(0, 2);
-    const bookExercises = [
-      { qNo: "Ex 1", marks: 3, q: isHi ? `${clean}: इस अध्याय के ऐतिहासिक या भौगोलिक महत्व पर 3 बिंदु लिखिए।` : `${clean}: Write three key historical or geographical takeaways from "${clean}".`, hint: "Include location, timeline, or civic impact.", ans: `Three key takeaways for ${clean}.`, steps: "1. Main event/feature\n2. Cause/Location\n3. Significance" }
-    ];
-    return { practiceQs: rotated, bookExercises };
   }
 
-  return { practiceQs: [], bookExercises: [] };
+  // Language chapters (English / Hindi / Sanskrit / Grammar): only return chapter exercises, no filler!
+  return [];
 }
 
 function padChapterToTen(ch, qsForCh) {
-  const { practiceQs, bookExercises } = buildChapterVariedPracticeAndExercises(ch);
-  const existingExs = ch.exercises ? ch.exercises.slice() : [];
-  if (existingExs.length < 2) {
-    for (const ex of bookExercises) {
-      if (!existingExs.some(e => e.q === ex.q)) existingExs.push(ex);
-    }
+  const problems = buildSubjectSpecificProblems(ch);
+  const exs = ch.exercises ? ch.exercises.slice() : [];
+  let pIdx = 0;
+  while (exs.length < 10 && pIdx < problems.length) {
+    const pr = problems[pIdx++];
+    exs.push({
+      qNo: String(exs.length + 1),
+      marks: 1,
+      q: pr.q,
+      hint: pr.exp,
+      ans: pr.ans,
+      steps: pr.exp
+    });
   }
-  ch.exercises = existingExs;
+  ch.exercises = exs;
 
   const addedQs = [];
-  for (const pr of practiceQs) {
-    if (qsForCh.length + addedQs.length >= 6) break;
-    if (!qsForCh.some(q => q.q === pr.q)) {
-      addedQs.push({
-        id: `q-sub-${ch.id}-${qsForCh.length + addedQs.length + 1}`,
-        chapterId: ch.id, bookId: ch.bookId, board: ch.board, medium: ch.medium,
-        classNum: ch.classNum, subjectId: ch.subjectId, topic: ch.title,
-        type: pr.options.length === 2 ? "TF" : (pr.options.length === 0 ? "FILL" : "MCQ"),
-        difficulty: "Medium", marks: 1,
-        q: pr.q, options: pr.options, ans: pr.ans, explanation: pr.exp, solution: pr.exp,
-        verificationStatus: "Generated", isSupplementary: true
-      });
-    }
+  let qIdx = 0;
+  while (qsForCh.length + addedQs.length < 10 && qIdx < problems.length) {
+    const pr = problems[qIdx++];
+    addedQs.push({
+      id: `q-sub-${ch.id}-${qsForCh.length + addedQs.length + 1}`,
+      chapterId: ch.id, bookId: ch.bookId, board: ch.board, medium: ch.medium,
+      classNum: ch.classNum, subjectId: ch.subjectId, topic: ch.title,
+      type: pr.options.length === 2 ? "TF" : (pr.options.length === 0 ? "FILL" : "MCQ"),
+      difficulty: "Medium", marks: 1,
+      q: pr.q, options: pr.options, ans: pr.ans, explanation: pr.exp, solution: pr.exp
+    });
   }
   return addedQs;
 }

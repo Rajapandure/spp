@@ -1,7 +1,6 @@
 // Chapter-Linked Educational Games Engine (Offline-First, Class 1-10)
-// Every class, subject, and chapter builds its Play activities from its own chapter content & questions.
-import { dbPut, recordLocalActivity } from "../db/database.js";
-import { awardActivityReward } from "../rewards/rewardService.js";
+// Includes Playcards (Flip & Recall), Match the Column, and Chapter Mini-Games for every chapter.
+import { dbPut, enqueueSyncRecord } from "../db/database.js";
 
 const GAME_GENERATORS = {
   count_shapes: (level) => {
@@ -20,6 +19,33 @@ const GAME_GENERATORS = {
       options: opts,
       answer: String(count)
     };
+  },
+  number_puzzle: (level) => {
+    const puzzles = [
+      { q: "Complete the number bond: 6 + ___ = 10", options: ["3", "4", "5", "6"], ans: "4", tip: "Count up from 6 to 10: 7, 8, 9, 10 (4 steps)." },
+      { q: "What comes next in skip counting by 5s: 5, 10, 15, ___?", options: ["18", "20", "25", "16"], ans: "20", tip: "Add 5 to 15: 15 + 5 = 20." },
+      { q: "3 groups of 4 apples = ___ apples", options: ["7", "10", "12", "14"], ans: "12", tip: "4 + 4 + 4 = 12." }
+    ];
+    const puz = puzzles[(level - 1) % puzzles.length];
+    return { prompt: puz.q, visual: `<div style="padding:10px;border-radius:12px;background:#fefce8;color:#713f12;font-size:0.86rem;">💡 Learn Tip: ${puz.tip}</div>`, options: puz.options, answer: puz.ans };
+  },
+  word_explorer: (level) => {
+    const rounds = [
+      { q: "Pick the Naming Word (Noun) for a place:", options: ["Jump", "School", "Happy", "Blue"], ans: "School", tip: "A Noun names a person, place, animal, or thing." },
+      { q: "Which word is an Action Word (Verb)?", options: ["Apple", "Chair", "Dance", "Tall"], ans: "Dance", tip: "A Verb shows an action you can do." },
+      { q: "Choose the right article: ___ elephant", options: ["A", "An"], ans: "An", tip: "Use An before vowel sounds (a, e, i, o, u)." }
+    ];
+    const r = rounds[(level - 1) % rounds.length];
+    return { prompt: r.q, visual: `<div style="padding:10px;border-radius:12px;background:#fdf2f8;color:#831843;font-size:0.86rem;">📖 Word Tip: ${r.tip}</div>`, options: r.options, answer: r.ans };
+  },
+  evs_explorer: (level) => {
+    const rounds = [
+      { q: "Which part of the plant makes food using sunlight?", options: ["Root", "Leaf", "Stem", "Seed"], ans: "Leaf", tip: "Green leaves contain chlorophyll to make food for the plant." },
+      { q: "Where does rainwater go when it falls on soil?", options: ["Groundwater", "Disappears forever", "Turns to stone"], ans: "Groundwater", tip: "Water seeps into the soil to recharge underground water." },
+      { q: "Which of these is a healthy habit?", options: ["Washing hands before meals", "Wasting water", "Skipping sleep"], ans: "Washing hands before meals", tip: "Clean hands keep germs away!" }
+    ];
+    const r = rounds[(level - 1) % rounds.length];
+    return { prompt: r.q, visual: `<div style="padding:10px;border-radius:12px;background:#ecfdf5;color:#065f46;font-size:0.86rem;">🌿 Nature Fact: ${r.tip}</div>`, options: r.options, answer: r.ans };
   },
   fraction_match: (level) => {
     const bank = [
@@ -59,51 +85,27 @@ const GAME_GENERATORS = {
   }
 };
 
-export function generateGameRound(gameType, level = 1, chapter = null, chQuestions = []) {
-  if (gameType && GAME_GENERATORS[gameType]) {
-    return GAME_GENERATORS[gameType](level);
-  }
-  // Build dynamic round from this exact chapter's own questions & concepts (never same across classes/subjects)
-  const mcqPool = (chQuestions || []).filter((q) => Array.isArray(q.options) && q.options.length >= 2);
-  if (mcqPool.length > 0) {
-    const q = mcqPool[(level - 1) % mcqPool.length];
-    const tip = q.explanation || chapter?.intro || "";
-    return {
-      prompt: q.q,
-      visual: tip ? `<div style="padding:10px;border-radius:12px;background:var(--bg-muted);font-size:0.86rem;">💡 ${tip}</div>` : "",
-      options: q.options,
-      answer: q.ans
-    };
-  }
-  if (chapter && chapter.concepts && chapter.concepts.length > 0) {
-    const c = chapter.concepts[(level - 1) % chapter.concepts.length];
-    return {
-      prompt: `What is "${c.term}"?`,
-      visual: "",
-      options: [c.def, "Not covered in this chapter"],
-      answer: c.def
-    };
-  }
-  return GAME_GENERATORS.count_shapes(level);
+export function generateGameRound(gameType, level = 1) {
+  const fn = GAME_GENERATORS[gameType] || GAME_GENERATORS.count_shapes;
+  return fn(level);
 }
 
-// Generate Playcards (Flashcards) strictly for the active chapter
+// Generate Playcards (Flashcards) for ANY chapter from its concepts, examples, exercises, and questions
 export function generatePlaycardsForChapter(chapter, chQuestions = []) {
-  const cards = (chapter.playcards && chapter.playcards.length)
-    ? chapter.playcards.map((c) => ({ front: c.front, back: c.back, tag: c.tag || "Teacher Card" }))
-    : [];
+  const cards = (chapter.playcards && chapter.playcards.length) ? chapter.playcards.map(c => ({ front: c.front, back: c.back, tag: c.tag || "Teacher Card" })) : [];
   for (const c of chapter.concepts || []) {
     cards.push({ front: c.term, back: c.def, tag: "Concept" });
   }
   for (const ex of chapter.examples || []) {
     cards.push({ front: ex.q, back: ex.a, tag: "Worked Example" });
   }
-  for (const r of chapter.revision || []) {
-    if (cards.length >= 8) break;
-    cards.push({ front: `Key Point (${chapter.title.replace(/^\d+\.\s*/, "")})`, back: r, tag: "Revision Fact" });
+  for (const q of chQuestions) {
+    if (cards.length >= 12) break;
+    cards.push({ front: q.q, back: `${q.ans}${q.explanation ? " — " + q.explanation : ""}`, tag: "Quick Recall" });
   }
-  if (cards.length < 3) {
-    cards.push({ front: chapter.title, back: chapter.intro || chapter.explanation, tag: "Chapter Overview" });
+  for (const ex of chapter.exercises || []) {
+    if (cards.length >= 12) break;
+    cards.push({ front: ex.q, back: ex.ans, tag: "Book Exercise" });
   }
   if (cards.length === 0) {
     cards.push({ front: chapter.title, back: chapter.intro || chapter.explanation, tag: "Summary" });
@@ -111,44 +113,33 @@ export function generatePlaycardsForChapter(chapter, chQuestions = []) {
   return cards;
 }
 
-// Generate Match-the-Column pairs strictly for the active chapter
+// Generate Match-the-Column pairs for ANY chapter
 export function generateMatchColumnForChapter(chapter, chQuestions = []) {
   const pairs = [];
   for (const c of chapter.concepts || []) {
     if (c.term && c.def) pairs.push({ id: `m_c_${pairs.length}`, left: c.term, right: c.def.slice(0, 72) });
   }
-  for (const ex of chapter.examples || []) {
-    if (pairs.length >= 6) break;
-    if (ex.q && ex.a) pairs.push({ id: `m_ex_${pairs.length}`, left: ex.q.slice(0, 68), right: String(ex.a).slice(0, 68) });
+  for (const q of chQuestions) {
+    if (pairs.length >= 10) break;
+    if (q.q && q.ans) {
+      pairs.push({ id: `m_q_${pairs.length}`, left: q.q.slice(0, 68), right: String(q.ans).slice(0, 68) });
+    }
   }
-  if (pairs.length < 2 && chapter.objectives?.length) {
-    chapter.objectives.forEach((obj, idx) => {
-      pairs.push({ id: `m_obj_${idx}`, left: `Goal ${idx + 1}`, right: obj.slice(0, 68) });
-    });
+  for (const ex of chapter.exercises || []) {
+    if (pairs.length >= 10) break;
+    pairs.push({ id: `m_e_${pairs.length}`, left: ex.q.slice(0, 68), right: String(ex.ans).slice(0, 68) });
   }
   const rightOptions = pairs.map((p) => ({ id: p.id, text: p.right }));
   for (let i = rightOptions.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [rightOptions[i], rightOptions[j]] = [rightOptions[j], rightOptions[i]];
   }
-  return { chapterId: chapter.id, pairs, rightOptions };
+  return { pairs, rightOptions };
 }
 
 export async function recordGameCompletion(studentProfile, game, score, total) {
   const attemptId = `game_${studentProfile.studentId}_${game.id}_${Date.now()}`;
-  const passed = score >= Math.ceil(total * 0.6);
-  const reward = passed
-    ? await awardActivityReward(studentProfile, {
-        activityType: "Educational Game Completion",
-        subjectId: game.subjectId || "",
-        chapterId: game.chapterId || "",
-        xp: (game.rewardCoins || 15) * 2,
-        coins: game.rewardCoins || 15,
-        idempotencyKey: `game_first::${studentProfile.studentId}::${game.id}`,
-        note: `Completed ${game.title} (${score}/${total})`
-      })
-    : { awarded: false, xp: 0, coins: 0 };
-
+  const earnedCoins = score >= 2 ? (game.rewardCoins || 15) : 5;
   const record = {
     attemptId,
     studentId: studentProfile.studentId,
@@ -157,11 +148,13 @@ export async function recordGameCompletion(studentProfile, game, score, total) {
     chapterId: game.chapterId,
     score,
     total,
-    earnedCoins: reward.coins,
-    earnedXP: reward.xp,
+    earnedCoins,
     createdAt: new Date().toISOString()
   };
   await dbPut("studentAttempts", record);
-  await recordLocalActivity(studentProfile.studentId, "game_attempt", record, attemptId);
-  return { earnedCoins: reward.coins, earnedXP: reward.xp, awarded: reward.awarded, record };
+  studentProfile.coins = (studentProfile.coins || 0) + earnedCoins;
+  studentProfile.xp = (studentProfile.xp || 0) + earnedCoins * 2;
+  await dbPut("studentProfiles", studentProfile);
+  await enqueueSyncRecord(studentProfile.studentId, "game_attempt", record, attemptId);
+  return { earnedCoins, record };
 }

@@ -2,8 +2,9 @@
   "name": "scholars-point",
   "version": "2.0.0",
   "private": true,
-  "description": "Scholars Point Offline-First PWA for Classes 1 to 10",
+  "type": "module",
+  "description": "Offline-First Digital Learning Platform for Classes 1-10 (NCERT, CBSE & MP Board)",
   "scripts": {
-    "build": "echo 'Static PWA ready for Vercel'"
+    "build": "python3 build.py"
   }
 }

@@ -452,6 +452,10 @@ async function renderPracticeTab(chapter, chQuestions) {
 
   const studentId = state.profile?.studentId;
   if (!studentId) return '<p class="sp-card">Please sign in to save your practice work.</p>';
+  const sourceBook = (state.curriculum?.books || []).find((book) => book.id === chapter.bookId);
+  const officialBookLink = sourceBook?.sourceUrl
+    ? '<a href="' + escapeHTML(sourceBook.sourceUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHTML(sourceBook.sourceLabel || "Official textbook") + ' ↗</a>'
+    : "";
 
   // Practice contains only the exercises supplied with this textbook chapter.
   const exercises = Array.isArray(chapter.exercises)
@@ -472,9 +476,9 @@ async function renderPracticeTab(chapter, chQuestions) {
           <strong>${escapeHTML(chapter.title)}</strong> yet.
         </p>
         <p style="font-size:.82rem;color:var(--text-muted);">
-          This section will display the actual textbook exercises when your
-          teacher adds them. Unrelated questions will not be shown.
+          The official book contains the source exercises. They are not yet imported into this offline practice list; questions from other chapters will never be substituted.
         </p>
+        ${officialBookLink ? '<p style="margin:12px 0 0;">' + officialBookLink + '</p>' : ""}
       </div>
     `;
   }
@@ -493,8 +497,9 @@ async function renderPracticeTab(chapter, chQuestions) {
           </div>
         </div>
         <p style="font-size:.84rem;color:var(--text-secondary);margin:10px 0 0;">
-          Work through every available exercise in this chapter. Open hints and solutions only after attempting the question.
+          Work through every exercise currently imported for this chapter. Open hints and solutions only after attempting the question.
         </p>
+        ${officialBookLink ? '<p style="margin:10px 0 0;font-size:.84rem;">Need the complete publisher exercise list? ' + officialBookLink + '</p>' : ""}
       </div>
 
       ${Object.entries(exercises.reduce((groups, ex, i) => { const matchedQuestion = (chQuestions || []).find(q => String(q.q || "").trim() === String(ex.q || "").trim()); const topic = String(ex.topic || ex.topicName || matchedQuestion?.topic || "Chapter Exercises"); (groups[topic] ||= []).push({ ex, i }); return groups; }, {})).map(([topic, entries]) => `

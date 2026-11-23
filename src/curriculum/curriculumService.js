@@ -9,10 +9,12 @@ const SEED_VERSION_KEY = "curriculum_seed_version";
 const CURRENT_SEED_VERSION = "2026.27.v9";
 const OFFICIAL_MATHS_SOURCES = {
   NCERT: "https://ncert.nic.in/textbook.php",
-  EPATHSHALA: "https://epathshala.nic.in/topics.php",
+  EPATHSHALA: "https://epathshala.nic.in/",
   DIKSHA: "https://diksha.gov.in/",
   MPTBC: "https://mptbc.mp.gov.in/",
-  MPBSE: "https://mpbse.nic.in/academics.html"
+  MPBSE: "https://mpbse.nic.in/academics.html",
+  CBSE: "https://cbseacademic.nic.in/",
+  NCERT_HOME: "https://ncert.nic.in/"
 };
 
 export function attachOfficialMathsSources(book) {
@@ -24,7 +26,7 @@ export function attachOfficialMathsSources(book) {
     sourceLabel: isMP ? "MP Textbook Corporation (MPTBC)" : "NCERT Official Textbooks",
     supplementarySourceUrl: isMP ? OFFICIAL_MATHS_SOURCES.DIKSHA : OFFICIAL_MATHS_SOURCES.EPATHSHALA,
     supplementarySourceLabel: isMP ? "DIKSHA – Madhya Pradesh" : "ePathshala – NCERT",
-    syllabusUrl: isMP && Number(book.classNum) >= 9 ? OFFICIAL_MATHS_SOURCES.MPBSE : OFFICIAL_MATHS_SOURCES.NCERT,
+    syllabusUrl: isMP ? OFFICIAL_MATHS_SOURCES.MPBSE : (book.board === "CBSE" ? OFFICIAL_MATHS_SOURCES.CBSE : OFFICIAL_MATHS_SOURCES.NCERT_HOME),
     sourceAttribution: isMP
       ? "Official MP textbook and syllabus reference. Book content remains subject to the publisher's terms."
       : "Official NCERT textbook reference. Open the publisher's portal for the original book and exercises.",

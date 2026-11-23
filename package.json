@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "echo 'Static PWA ready'"
-  }
+    "build": "npm run check && npm test",
+    "check": "node --check src/app.js && node --check src/games/gameEngine.js && node --check src/assessment/examEngine.js",
+    "test": "node --test"
+  },
+  "type": "module"
 }

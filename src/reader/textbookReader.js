@@ -116,6 +116,15 @@ export async function renderLearnChapterHTML(chapter, studentProfile, fontSizePx
         ${diagramHTML}
       </div>
 
+      ${(chapter.formulas || []).length ? `
+        <div style="margin-bottom:16px;">
+          <div style="font-weight:800;font-size:0.95rem;margin-bottom:8px;">🧮 Important Formulas</div>
+          <div style="display:grid;gap:8px;">
+            ${chapter.formulas.map((f) => `<div style="padding:12px;border-radius:12px;border:1px solid var(--border-subtle);background:var(--bg-card);"><strong>${f.name || f.title || "Formula"}</strong><div style="font-size:1.05rem;font-weight:800;margin-top:5px">${f.expression || f.formula || f.value || ""}</div>${f.note ? `<p style="margin:5px 0 0">${f.note}</p>` : ""}</div>`).join("")}
+          </div>
+        </div>
+      ` : ""}
+
       ${(chapter.concepts || []).length ? `
         <div style="margin-bottom:16px;">
           <div style="font-weight:800;font-size:0.95rem;margin-bottom:8px;">🔑 Important Concepts & Definitions</div>

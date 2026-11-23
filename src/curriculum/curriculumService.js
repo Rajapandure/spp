@@ -1,16 +1,24 @@
 // Curriculum Service: Seeding, Strict Scoping by (session, board, medium, classNum), and Completeness Audit
-import { dbBulkPut, dbGet, dbGetAll, dbPut } from "../db/database.js";
+import { dbBulkPut, dbDelete, dbGet, dbGetAll, dbPut } from "../db/database.js";
 import { getSeedPart1 } from "./seed_part1.js";
 import { getSeedPart2 } from "./seed_part2.js";
 import { generateFullSyllabusCoverage } from "./full_syllabus_generator.js";
 import { generateEnglishGrammarCurriculum } from "./grammar_curriculum.js";
 
 const SEED_VERSION_KEY = "curriculum_seed_version";
-const CURRENT_SEED_VERSION = "2026.27.v7";
+const CURRENT_SEED_VERSION = "2026.27.v8";
 
 export async function ensureCurriculumSeeded() {
   const existing = await dbGet("settings", SEED_VERSION_KEY);
   if (existing && existing.value === CURRENT_SEED_VERSION) return;
+
+  // Remove legacy auto-padded Maths questions from older seed versions. These mixed topics
+  // into unrelated chapters (for example, HCF/LCM into Coordinate Geometry).
+  const storedQuestions = await dbGetAll("questions");
+  const legacyMathsFillers = storedQuestions.filter((q) =>
+    q.subjectId === "maths" && String(q.id || "").startsWith("q-sub-")
+  );
+  await Promise.all(legacyMathsFillers.map((q) => dbDelete("questions", q.id)));
 
   const p1 = getSeedPart1();
   const p2 = getSeedPart2();

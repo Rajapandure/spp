@@ -486,14 +486,14 @@ async function renderPracticeTab(chapter, chQuestions) {
         <div style="display:flex;align-items:center;gap:12px;">
           <div style="font-size:2rem;">📚</div>
           <div>
-            <h3 style="margin:0;">Textbook Practice</h3>
+            <h3 style="margin:0;">Chapter Exercises</h3>
             <div style="font-size:.83rem;color:var(--text-muted);">
-              ${exercises.length} exercise(s) · Original textbook order
+              ${exercises.length} available exercise(s) · Chapter-specific content
             </div>
           </div>
         </div>
         <p style="font-size:.84rem;color:var(--text-secondary);margin:10px 0 0;">
-          Attempt each question yourself before opening its hint or solution.
+          Work through every available exercise in this chapter. Open hints and solutions only after attempting the question.
         </p>
       </div>
 
@@ -654,8 +654,8 @@ async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
   const total=questions.reduce((sum,q)=>sum+Number(q.marks||1),0);
   return `
   <div style="display:grid;gap:14px">
-    <div class="sp-card" style="padding:16px"><h3 style="margin:0">${esc(chapter.title)} · 20-question chapter test</h3>
-      <p style="margin:6px 0;color:var(--text-muted);font-size:.84rem">${questions.length} reviewed questions · ${total} marks · answers saved on this device</p>
+    <div class="sp-card" style="padding:16px"><h3 style="margin:0">${esc(chapter.title)} · Chapter test</h3>
+      <p style="margin:6px 0;color:var(--text-muted);font-size:.84rem">${questions.length} chapter-mapped questions · ${total} marks · answers saved on this device</p>
       <div style="height:8px;background:var(--bg-muted);border-radius:99px;overflow:hidden"><div style="height:8px;width:${Math.round(Object.keys(qt.answers||{}).length/questions.length*100)}%;background:var(--accent-primary)"></div></div>
     </div>
     ${questions.map((q,i)=>{const id=q.id||String(i),given=qt.answers[id]||"",opts=Array.isArray(q.options)?q.options:[];return `
@@ -665,7 +665,7 @@ async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
       ${qt.submitted?`<p style="font-size:.82rem;margin-top:8px">${normalizeAns(given)===normalizeAns(q.ans)?"✓ Correct":`Correct answer: ${esc(q.ans)}`}</p>`:""}
       </article>`;}).join("")}
     <div class="sp-card" style="padding:16px">
-      ${qt.submitted?`<h3>Result: ${score} / ${total}</h3><p>Attempt saved on this device.</p><button class="sp-btn sp-btn-primary" onclick="window.SP.resetQuickTest()">Retake test</button>`:`<button class="sp-btn sp-btn-primary" onclick="window.SP.submitQuickTest()">Submit 20-question test</button>`}
+      ${qt.submitted?`<h3>Result: ${score} / ${total}</h3><p>Attempt saved on this device.</p><button class="sp-btn sp-btn-primary" onclick="window.SP.resetQuickTest()">Retake test</button>`:`<button class="sp-btn sp-btn-primary" onclick="window.SP.submitQuickTest()">Submit chapter test (${questions.length} questions)</button>`}
     </div>
   </div>`;
 }

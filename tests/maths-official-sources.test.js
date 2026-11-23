@@ -6,7 +6,7 @@ test("NCERT and CBSE Maths books link to official NCERT and ePathshala sources",
   for (const board of ["NCERT", "CBSE"]) {
     const book = attachOfficialMathsSources({ subjectId: "maths", board, classNum: "10" });
     assert.equal(book.sourceUrl, "https://ncert.nic.in/textbook.php");
-    assert.equal(book.supplementarySourceUrl, "https://epathshala.nic.in/topics.php");
+    assert.equal(book.supplementarySourceUrl, "https://epathshala.nic.in/");
     assert.equal(book.contentPolicy, "LINK_TO_OFFICIAL_SOURCE");
   }
 });

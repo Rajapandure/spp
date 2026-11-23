@@ -601,10 +601,10 @@ function renderGamesTab(chapter, chGames, chQuestions) {
     gs.playChapterId = chapter.id; gs.playTopicSnapshot = gs.playTopic || "ALL"; gs.playModeSnapshot = gs.playMode || "mastery"; gs.playIndex = 0; gs.playScore = 0; gs.playAnswered = false; gs.playFeedback = ""; gs.playSelected = "";
     gs.playRound = [...filtered].sort(()=>Math.random()-.5).slice(0,Math.min(roundLimit,filtered.length));
   }
-  const q = gs.playRound[gs.playIndex];
   const total = gs.playRound.length;
-  const options = Array.isArray(q.options) && q.options.length >= 2 ? q.options : [];
   const isDone = gs.playIndex >= total;
+  const q = isDone ? null : gs.playRound[gs.playIndex];
+  const options = q && Array.isArray(q.options) && q.options.length >= 2 ? q.options : [];
   const answer = gs.playSelected ?? "";
   const feedback = gs.playFeedback || "";
   const progress = isDone ? 100 : Math.round((gs.playIndex/total)*100);

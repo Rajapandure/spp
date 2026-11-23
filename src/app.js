@@ -586,314 +586,51 @@ async function renderPracticeTab(chapter, chQuestions) {
 }
 function renderGamesTab(chapter, chGames, chQuestions) {
   const gs = state.gameState;
-
-  const escapeHTML = (value) => String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-  // Build activities only from actual content belonging to this chapter.
-  const cards = [];
-
-  if (Array.isArray(chapter.playcards)) {
-    chapter.playcards.forEach((card) => {
-      if (
-        card &&
-        String(card.front ?? "").trim() &&
-        String(card.back ?? "").trim()
-      ) {
-        cards.push({
-          front: card.front,
-          back: card.back,
-          tag: card.tag || "Chapter Concept"
-        });
-      }
-    });
+  const esc = (v) => String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+  const topics = [...new Set((chapter.exercises || []).map((q) => String(q.topic || q.topicName || "").trim()).filter(Boolean))];
+  const questions = (chQuestions || []).filter((q) => q && String(q.q || "").trim() && String(q.ans ?? "").trim());
+  const chapterExercises = (chapter.exercises || []).filter((q) => q && String(q.q || "").trim() && String(q.ans ?? "").trim());
+  const pool = questions.length ? questions : chapterExercises.map((q,i)=>({id:q.id || `exercise-${i}`,chapterId:chapter.id,topic:q.topic || "Chapter practice",type:"MCQ",difficulty:"Easy",marks:q.marks || 1,q:q.q,options:q.options,ans:q.ans,explanation:q.explanation || q.steps}));
+  const filtered = gs.playTopic && gs.playTopic !== "ALL" ? pool.filter(q => (q.topic || "General") === gs.playTopic) : pool;
+  const topicList = [...new Set(pool.map(q => q.topic || "General"))];
+  if (!filtered.length) return `<div class="sp-card" style="padding:20px"><h3>Topic practice is being prepared</h3><p>Reviewed interactive questions for this chapter will appear here. No unrelated questions are added.</p></div>`;
+  if (!gs.playRound || gs.playChapterId !== chapter.id || gs.playTopicSnapshot !== (gs.playTopic || "ALL")) {
+    gs.playChapterId = chapter.id; gs.playTopicSnapshot = gs.playTopic || "ALL"; gs.playIndex = 0; gs.playScore = 0; gs.playAnswered = false; gs.playFeedback = "";
+    gs.playRound = [...filtered].sort(()=>Math.random()-.5).slice(0,Math.min(20,filtered.length));
   }
-
-  if (Array.isArray(chapter.concepts)) {
-    chapter.concepts.forEach((concept) => {
-      if (
-        concept &&
-        String(concept.term ?? "").trim() &&
-        String(concept.def ?? "").trim()
-      ) {
-        cards.push({
-          front: concept.term,
-          back: concept.def,
-          tag: "Important Concept"
-        });
-      }
-    });
-  }
-
-  if (Array.isArray(chapter.examples)) {
-    chapter.examples.forEach((example) => {
-      if (
-        example &&
-        String(example.q ?? "").trim() &&
-        String(example.a ?? "").trim()
-      ) {
-        cards.push({
-          front: example.q,
-          back: example.a,
-          tag: "Chapter Example"
-        });
-      }
-    });
-  }
-
-  if (Array.isArray(chapter.exercises)) {
-    chapter.exercises.forEach((exercise) => {
-      if (
-        exercise &&
-        String(exercise.q ?? "").trim() &&
-        String(exercise.ans ?? "").trim()
-      ) {
-        cards.push({
-          front: exercise.q,
-          back: exercise.ans,
-          tag: "Textbook Question"
-        });
-      }
-    });
-  }
-
-  // Create matching pairs from chapter-specific content.
-  const pairs = [];
-
-  cards.forEach((card, index) => {
-    if (card.front && card.back) {
-      pairs.push({
-        id: `chapter-pair-${index}`,
-        left: card.front,
-        right: card.back
-      });
-    }
-  });
-
-  if (!cards.length) {
-    return `
-      <div class="sp-card" style="padding:24px;text-align:center;">
-        <div style="font-size:2rem;">🎮</div>
-        <h3>Chapter Games Coming Soon</h3>
-        <p style="color:var(--text-secondary);">
-          Learning activities have not been added for
-          <strong>${escapeHTML(chapter.title)}</strong> yet.
-        </p>
-        <p style="font-size:.82rem;color:var(--text-muted);">
-          Your teacher can add chapter playcards, concepts, examples
-          and solved exercises through the CMS.
-        </p>
-      </div>
-    `;
-  }
-
-  // Prepare matching data once for this chapter.
-  if (!gs.matchData) {
-    gs.matchData = {
-      pairs,
-      rightOptions: [...pairs]
-        .sort(() => Math.random() - 0.5)
-        .map(pair => ({
-          id: pair.id,
-          text: pair.right
-        }))
-    };
-
-    gs.matchedIds = [];
-    gs.matchLeft = null;
-    gs.matchFeedback = "";
-  }
-
-  const activePairs = gs.matchData.pairs || [];
-  const activeRightOptions = gs.matchData.rightOptions || [];
-
-  let modeHTML = "";
-
-  if (gs.mode === "playcard") {
-    const idx = ((gs.cardIdx % cards.length) + cards.length) % cards.length;
-    const card = cards[idx];
-
-    modeHTML = `
-      <div class="sp-card" style="padding:18px;">
-
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-          <span class="sp-badge">
-            Card ${idx + 1} of ${cards.length}
-          </span>
-          <span class="sp-badge" style="background:var(--bg-muted);color:var(--text-secondary);">
-            ${escapeHTML(card.tag)}
-          </span>
-        </div>
-
-        <div
-          onclick="window.SP.flipPlaycard()"
-          role="button"
-          tabindex="0"
-          style="
-            cursor:pointer;
-            min-height:190px;
-            padding:24px;
-            border-radius:18px;
-            border:2px solid var(--accent-primary);
-            background:var(--bg-muted);
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:center;
-            text-align:center;
-            gap:14px;
-          ">
-
-          <div style="font-size:.76rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;">
-            ${gs.flipped ? "Answer / Explanation" : "Question / Concept"}
-          </div>
-
-          <div style="font-size:1.1rem;font-weight:800;line-height:1.6;white-space:pre-wrap;">
-            ${escapeHTML(gs.flipped ? card.back : card.front)}
-          </div>
-
-          <div style="font-size:.78rem;color:var(--text-muted);">
-            Tap the card to ${gs.flipped ? "see the question" : "reveal the answer"}
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
-          <button class="sp-btn sp-btn-secondary"
-            onclick="window.SP.flipPlaycard()">
-            🔄 ${gs.flipped ? "Show Question" : "Reveal Answer"}
-          </button>
-
-          <button class="sp-btn sp-btn-primary"
-            onclick="window.SP.nextPlaycard()">
-            Next Card →
-          </button>
-        </div>
-
-      </div>
-    `;
-  } else {
-    const allDone =
-      activePairs.length > 0 &&
-      gs.matchedIds.length === activePairs.length;
-
-    modeHTML = `
-      <div class="sp-card" style="padding:16px;">
-
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-          <div>
-            <strong>Match the Correct Answers</strong>
-            <div style="font-size:.8rem;color:var(--text-muted);">
-              Matched ${gs.matchedIds.length} of ${activePairs.length}
-            </div>
-          </div>
-
-          <button class="sp-btn sp-btn-secondary"
-            style="min-height:34px;font-size:12px;"
-            onclick="window.SP.resetMatchGame()">
-            ↻ Restart
-          </button>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-
-          <div style="display:grid;gap:8px;min-width:0;">
-            <div style="font-size:.76rem;font-weight:800;color:var(--text-muted);">
-              COLUMN A · QUESTIONS
-            </div>
-
-            ${activePairs.map(pair => {
-              const matched = gs.matchedIds.includes(pair.id);
-              const selected = gs.matchLeft === pair.id;
-
-              return `
-                <button
-                  class="sp-btn ${matched ? "sp-btn-success" : selected ? "sp-btn-primary" : "sp-btn-secondary"}"
-                  style="height:auto;min-height:48px;padding:10px;justify-content:flex-start;text-align:left;white-space:normal;"
-                  ${matched ? "disabled" : ""}
-                  onclick="window.SP.pickMatchLeft('${pair.id}')">
-                  ${escapeHTML(pair.left)}
-                </button>
-              `;
-            }).join("")}
-          </div>
-
-          <div style="display:grid;gap:8px;min-width:0;">
-            <div style="font-size:.76rem;font-weight:800;color:var(--text-muted);">
-              COLUMN B · ANSWERS
-            </div>
-
-            ${activeRightOptions.map(option => {
-              const matched = gs.matchedIds.includes(option.id);
-
-              return `
-                <button
-                  class="sp-btn ${matched ? "sp-btn-success" : "sp-btn-secondary"}"
-                  style="height:auto;min-height:48px;padding:10px;justify-content:flex-start;text-align:left;white-space:normal;"
-                  ${matched ? "disabled" : ""}
-                  onclick="window.SP.pickMatchRight('${option.id}')">
-                  ${escapeHTML(option.text)}
-                </button>
-              `;
-            }).join("")}
-          </div>
-
-        </div>
-
-        ${gs.matchFeedback ? `
-          <div style="margin-top:14px;font-weight:700;">
-            ${escapeHTML(gs.matchFeedback)}
-          </div>
-        ` : ""}
-
-        ${allDone ? `
-          <div style="margin-top:14px;padding:14px;border-radius:12px;background:#d1fae5;color:#065f46;font-weight:800;text-align:center;">
-            🎉 Excellent! You matched every item correctly!
-            <div style="font-size:.82rem;font-weight:500;margin-top:4px;">
-              You have completed this chapter activity.
-            </div>
-          </div>
-        ` : ""}
-
-      </div>
-    `;
-  }
-
+  const q = gs.playRound[gs.playIndex];
+  const total = gs.playRound.length;
+  const options = Array.isArray(q.options) && q.options.length >= 2 ? q.options : [];
+  const isDone = gs.playIndex >= total;
+  const answer = gs.playSelected ?? "";
+  const feedback = gs.playFeedback || "";
+  const progress = isDone ? 100 : Math.round((gs.playIndex/total)*100);
+  const body = isDone ? `
+    <div style="text-align:center;padding:22px">
+      <div style="font-size:2.6rem">🏆</div><h2>Round complete!</h2>
+      <p style="font-size:1.25rem;font-weight:800">${gs.playScore} / ${total} correct</p>
+      <p>Keep practising to improve your score.</p>
+      <button class="sp-btn sp-btn-primary" onclick="window.SP.restartTopicPlay()">Play another round</button>
+    </div>` : `
+    <div style="height:8px;background:var(--bg-muted);border-radius:99px;overflow:hidden"><div style="height:8px;width:${progress}%;background:var(--accent-primary)"></div></div>
+    <div style="display:flex;justify-content:space-between;margin:12px 0;color:var(--text-muted);font-size:.82rem"><span>Question ${gs.playIndex+1} of ${total}</span><span>⭐ ${gs.playScore} correct</span></div>
+    <div style="font-size:1.08rem;font-weight:800;line-height:1.6;margin:18px 0">${esc(q.q)}</div>
+    ${options.length ? `<div style="display:grid;gap:9px">${options.map((o,i)=>`<button class="sp-btn ${answer===o?(gs.playAnswered?(String(o)===String(q.ans)?"sp-btn-success":"sp-btn-danger"):"sp-btn-primary"):"sp-btn-secondary"}" style="height:auto;min-height:48px;white-space:normal;text-align:left;justify-content:flex-start" ${gs.playAnswered?"disabled":""} onclick="window.SP.answerTopicPlay(${i})">${esc(o)}</button>`).join("")}</div>` : `<input class="sp-input" id="sp-play-answer" placeholder="Type your answer" value="${esc(answer)}" ${gs.playAnswered?"disabled":""} />`}
+    ${feedback ? `<div style="margin-top:12px;padding:12px;border-radius:12px;background:var(--bg-muted)"><strong>${esc(feedback)}</strong>${q.explanation? `<p style="margin:6px 0 0">${esc(q.explanation)}</p>`:""}</div>`:""}
+    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+      ${!gs.playAnswered? `<button class="sp-btn sp-btn-primary" onclick="window.SP.submitTopicPlay()">Check answer</button>`:`<button class="sp-btn sp-btn-primary" onclick="window.SP.nextTopicPlay()">${gs.playIndex===total-1?"See result":"Next question →"}</button>`}
+    </div>`;
   return `
-    <div style="display:grid;gap:14px;">
-
-      <div class="sp-card" style="padding:14px;">
-        <div style="font-weight:800;">🎮 ${escapeHTML(chapter.title)} — Learning Games</div>
-        <div style="font-size:.82rem;color:var(--text-muted);margin-top:4px;">
-          Activities are created from this chapter's supplied learning content.
-        </div>
+    <div style="display:grid;gap:14px">
+      <div class="sp-card" style="padding:16px"><div style="font-weight:800">🎯 Topic Challenge · ${esc(chapter.title)}</div><p style="margin:5px 0 0;color:var(--text-muted);font-size:.84rem">Short interactive rounds built from this chapter's reviewed questions.</p>
+        <label style="display:block;font-size:.82rem;font-weight:700;margin-top:12px">Choose a topic</label>
+        <select class="sp-input" onchange="window.SP.setPlayTopic(this.value)" style="margin-top:5px"><option value="ALL" ${!gs.playTopic||gs.playTopic==="ALL"?"selected":""}>All topics</option>${topicList.map(t=>`<option value="${esc(t)}" ${gs.playTopic===t?"selected":""}>${esc(t)}</option>`).join("")}</select>
       </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button
-          class="sp-btn ${gs.mode === "playcard" ? "sp-btn-primary" : "sp-btn-secondary"}"
-          style="min-height:38px;font-size:12px;"
-          onclick="window.SP.setPlayMode('playcard')">
-          🃏 Question & Answer Cards
-        </button>
-
-        <button
-          class="sp-btn ${gs.mode === "match" ? "sp-btn-primary" : "sp-btn-secondary"}"
-          style="min-height:38px;font-size:12px;"
-          onclick="window.SP.setPlayMode('match')">
-          🔗 Match the Column
-        </button>
-      </div>
-
-      ${modeHTML}
-
-    </div>
-  `;
+      <div class="sp-card" style="padding:18px">${body}</div>
+      <div style="font-size:.78rem;color:var(--text-muted)">Question pool: ${filtered.length} reviewed question(s). This round uses up to 20 unique questions.</div>
+    </div>`;
 }
-async async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
+async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
   const escapeHTML = (value) => String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")

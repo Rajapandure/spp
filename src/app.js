@@ -1121,28 +1121,11 @@ window.SP = {
   setPracticeDifficulty: (d) => { state.practiceState.difficulty = d; state.practiceState.idx = 0; state.practiceState.answered = false; render(); },
   togglePracticeRetry: () => { state.practiceState.retryOnly = !state.practiceState.retryOnly; state.practiceState.idx = 0; state.practiceState.answered = false; render(); },
   resetPracticeFilters: () => { state.practiceState = { idx: 0, answered: false, selected: "", difficulty: "ALL", retryOnly: false }; render(); },
-  setPlayMode: (m) => { state.gameState.mode = m; render(); },
-  flipPlaycard: () => { state.gameState.flipped = !state.gameState.flipped; render(); },
-  nextPlaycard: () => { state.gameState.cardIdx++; state.gameState.flipped = false; render(); },
-  resetMatchGame: () => { state.gameState.matchData = null; state.gameState.matchLeft = null; state.gameState.matchedIds = []; state.gameState.matchFeedback = ""; render(); },
-  pickMatchLeft: (id) => { state.gameState.matchLeft = id; state.gameState.matchFeedback = "Now tap the matching item in Column B!"; render(); },
-  pickMatchRight: async (id) => {
-    const gs = state.gameState;
-    if (!gs.matchLeft) { gs.matchFeedback = "First select an item from Column A."; return render(); }
-    if (gs.matchLeft === id) {
-      gs.matchedIds.push(id);
-      gs.matchLeft = null;
-      gs.matchFeedback = "✅ Matched!";
-      if (gs.matchData && gs.matchedIds.length === gs.matchData.pairs.length) {
-        state.profile.xp = (state.profile.xp || 0) + 15;
-        state.profile.coins = (state.profile.coins || 0) + 10;
-        await dbPut("studentProfiles", state.profile);
-      }
-    } else {
-      gs.matchFeedback = "❌ Not a match — try again!";
-    }
-    render();
-  },
+  setPlayTopic: (topic) => { Object.assign(state.gameState,{playTopic:topic,playRound:null,playIndex:0,playScore:0,playAnswered:false,playSelected:"",playFeedback:""}); render(); },
+  answerTopicPlay: (index) => { const q=state.gameState.playRound?.[state.gameState.playIndex]; if(!q||state.gameState.playAnswered)return; state.gameState.playSelected=(q.options||[])[index]??""; render(); },
+  submitTopicPlay: () => { const gs=state.gameState,q=gs.playRound?.[gs.playIndex]; if(!q||gs.playAnswered)return; const typed=document.getElementById("sp-play-answer")?.value||gs.playSelected||""; gs.playSelected=typed; gs.playAnswered=true; const ok=normalizeAns(typed)===normalizeAns(q.ans); if(ok)gs.playScore=(gs.playScore||0)+1; gs.playFeedback=ok?"Correct! Well done.":"Not quite. Review the explanation, then continue."; render(); },
+  nextTopicPlay: () => { const gs=state.gameState; gs.playIndex++;gs.playAnswered=false;gs.playSelected="";gs.playFeedback="";render(); },
+  restartTopicPlay: () => { const gs=state.gameState;gs.playRound=null;gs.playIndex=0;gs.playScore=0;gs.playAnswered=false;gs.playSelected="";gs.playFeedback="";render(); },
   savePracticeAnswer: async (index, response) => {
     const chapter = state.curriculum?.chapters.find((item) => item.id === state.selectedChapterId);
     const exercise = (chapter?.exercises || []).filter((item) => item && typeof item.q === "string" && item.q.trim())[index];
@@ -1165,24 +1148,17 @@ window.SP = {
     render();
   },
   submitQuickTest: async () => {
-    const qt = state.quickTest;
-    if (qt.submitted) return;
-    const student = state.profile;
-    const chapter = state.curriculum?.chapters.find((item) => item.id === state.selectedChapterId);
-    if (!student || !chapter || qt.chapterId !== chapter.id) return;
-    const exercises = (chapter.exercises || []).filter((ex) => ex && typeof ex.q === "string" && ex.q.trim());
-    const gradable = exercises.filter((ex) => String(ex.ans ?? "").trim());
-    const correct = gradable.filter((ex) => normalizeAns(qt.answers[`booktest-${chapter.id}-${exercises.indexOf(ex)}`] || "") === normalizeAns(ex.ans));
-    const score = correct.reduce((sum, ex) => sum + Number(ex.marks || 1), 0);
-    const totalMarks = gradable.reduce((sum, ex) => sum + Number(ex.marks || 1), 0);
-    const attemptId = `chapter_test_${student.studentId}_${chapter.id}_${Date.now()}`;
-    const attempt = { attemptId, studentId: student.studentId, studentName: student.name, classNum: student.classNum, board: student.board, medium: student.medium, type: "chapter_test", chapterId: chapter.id, title: chapter.title, score, totalMarks, questionCount: exercises.length, gradableCount: gradable.length, answers: { ...qt.answers }, evaluationStatus: gradable.length === exercises.length ? "evaluated" : "pending_teacher_review", createdAt: new Date().toISOString() };
-    await dbPut("studentAttempts", attempt);
-    qt.submitted = true;
-    qt.attemptId = attemptId;
-    await dbPut("settings", { key: `chapter_test_draft::${student.studentId}::${chapter.id}`, value: qt });
-    showToast("Chapter test submitted and saved on this device.", "success");
-    render();
+    const qt=state.quickTest,student=state.profile,chapter=state.curriculum?.chapters.find(c=>c.id===state.selectedChapterId);
+    if(!student||!chapter||qt.submitted||!qt.questions?.length)return;
+    const questions=qt.questions,answers=qt.answers||{};
+    const gradable=questions.filter(q=>String(q.ans??"").trim());
+    const score=gradable.reduce((sum,q,i)=>sum+(normalizeAns(answers[q.id||String(i)]||"")===normalizeAns(q.ans)?Number(q.marks||1):0),0);
+    const totalMarks=gradable.reduce((sum,q)=>sum+Number(q.marks||1),0);
+    const attemptId=`chapter_test_${student.studentId}_${chapter.id}_${Date.now()}`;
+    await dbPut("studentAttempts",{attemptId,studentId:student.studentId,studentName:student.name,classNum:student.classNum,board:student.board,medium:student.medium,type:"chapter_test",chapterId:chapter.id,title:chapter.title,score,totalMarks,questionCount:questions.length,answers:{...answers},evaluationStatus:gradable.length===questions.length?"evaluated":"pending_teacher_review",createdAt:new Date().toISOString()});
+    qt.submitted=true;qt.attemptId=attemptId;
+    await dbPut("settings",{key:`chapter_test_draft::${student.studentId}::${chapter.id}`,value:qt});
+    showToast("20-question test submitted and saved on this device.","success");render();
   },
   resetQuickTest: async () => {
     const studentId = state.profile?.studentId, chapterId = state.selectedChapterId;

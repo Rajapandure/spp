@@ -36,7 +36,7 @@ const state = {
   chapterTab: "LEARN", // LEARN | PRACTICE | EXERCISE | PLAY | TEST
   readerFontSize: 16,
   practiceState: { idx: 0, answered: false, selected: "", difficulty: "ALL", retryOnly: false },
-  gameState: { mode: "playcard", cardIdx: 0, flipped: false, matchData: null, matchLeft: null, matchedIds: [], matchFeedback: "", activeGame: null, level: 1, score: 0, round: null, feedback: "" },
+  gameState: { mode: "playcard", playMode: "mastery", cardIdx: 0, flipped: false, matchData: null, matchLeft: null, matchedIds: [], matchFeedback: "", activeGame: null, level: 1, score: 0, round: null, feedback: "" },
   quickTest: { answers: {}, submitted: false },
   examState: { paper: null, answers: {}, currentIdx: 0, secondsLeft: 0, timerId: null, lastResult: null },
   darkMode: false
@@ -590,16 +590,16 @@ async function renderPracticeTab(chapter, chQuestions) {
 function renderGamesTab(chapter, chGames, chQuestions) {
   const gs = state.gameState;
   const esc = (v) => String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-  const topics = [...new Set((chapter.exercises || []).map((q) => String(q.topic || q.topicName || "").trim()).filter(Boolean))];
   const questions = (chQuestions || []).filter((q) => q && String(q.q || "").trim() && String(q.ans ?? "").trim());
   const chapterExercises = (chapter.exercises || []).filter((q) => q && String(q.q || "").trim() && String(q.ans ?? "").trim());
   const pool = questions.length ? questions : chapterExercises.map((q,i)=>({id:q.id || `exercise-${i}`,chapterId:chapter.id,topic:q.topic || "Chapter practice",type:"MCQ",difficulty:"Easy",marks:q.marks || 1,q:q.q,options:q.options,ans:q.ans,explanation:q.explanation || q.steps}));
   const filtered = gs.playTopic && gs.playTopic !== "ALL" ? pool.filter(q => (q.topic || "General") === gs.playTopic) : pool;
   const topicList = [...new Set(pool.map(q => q.topic || "General"))];
+  const roundLimit = gs.playMode === "sprint" ? 5 : gs.playMode === "challenge" ? 10 : 20;
   if (!filtered.length) return `<div class="sp-card" style="padding:20px"><h3>Topic practice is being prepared</h3><p>Reviewed interactive questions for this chapter will appear here. No unrelated questions are added.</p></div>`;
-  if (!gs.playRound || gs.playChapterId !== chapter.id || gs.playTopicSnapshot !== (gs.playTopic || "ALL")) {
-    gs.playChapterId = chapter.id; gs.playTopicSnapshot = gs.playTopic || "ALL"; gs.playIndex = 0; gs.playScore = 0; gs.playAnswered = false; gs.playFeedback = "";
-    gs.playRound = [...filtered].sort(()=>Math.random()-.5).slice(0,Math.min(20,filtered.length));
+  if (!gs.playRound || gs.playChapterId !== chapter.id || gs.playTopicSnapshot !== (gs.playTopic || "ALL") || gs.playModeSnapshot !== (gs.playMode || "mastery")) {
+    gs.playChapterId = chapter.id; gs.playTopicSnapshot = gs.playTopic || "ALL"; gs.playModeSnapshot = gs.playMode || "mastery"; gs.playIndex = 0; gs.playScore = 0; gs.playAnswered = false; gs.playFeedback = ""; gs.playSelected = "";
+    gs.playRound = [...filtered].sort(()=>Math.random()-.5).slice(0,Math.min(roundLimit,filtered.length));
   }
   const q = gs.playRound[gs.playIndex];
   const total = gs.playRound.length;
@@ -626,11 +626,13 @@ function renderGamesTab(chapter, chGames, chQuestions) {
   return `
     <div style="display:grid;gap:14px">
       <div class="sp-card" style="padding:16px"><div style="font-weight:800">🎯 Topic Challenge · ${esc(chapter.title)}</div><p style="margin:5px 0 0;color:var(--text-muted);font-size:.84rem">Short interactive rounds built from this chapter's reviewed questions.</p>
+        <label style="display:block;font-size:.82rem;font-weight:700;margin-top:12px">Choose a game mode</label>
+        <select class="sp-input" onchange="window.SP.setPlayMode(this.value)" style="margin-top:5px"><option value="sprint" ${gs.playMode==="sprint"?"selected":""}>⚡ Quick Sprint · 5 questions</option><option value="challenge" ${gs.playMode==="challenge"?"selected":""}>🎯 Topic Challenge · 10 questions</option><option value="mastery" ${!gs.playMode||gs.playMode==="mastery"?"selected":""}>🏆 Mastery Round · 20 questions</option></select>
         <label style="display:block;font-size:.82rem;font-weight:700;margin-top:12px">Choose a topic</label>
         <select class="sp-input" onchange="window.SP.setPlayTopic(this.value)" style="margin-top:5px"><option value="ALL" ${!gs.playTopic||gs.playTopic==="ALL"?"selected":""}>All topics</option>${topicList.map(t=>`<option value="${esc(t)}" ${gs.playTopic===t?"selected":""}>${esc(t)}</option>`).join("")}</select>
       </div>
       <div class="sp-card" style="padding:18px">${body}</div>
-      <div style="font-size:.78rem;color:var(--text-muted)">Question pool: ${filtered.length} reviewed question(s). This round uses up to 20 unique questions.</div>
+      <div style="font-size:.78rem;color:var(--text-muted)">Question pool: ${filtered.length} chapter-mapped question(s). This mode uses up to ${roundLimit} unique questions; it never fills gaps with another chapter’s content.</div>
     </div>`;
 }
 async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
@@ -1125,6 +1127,7 @@ window.SP = {
   togglePracticeRetry: () => { state.practiceState.retryOnly = !state.practiceState.retryOnly; state.practiceState.idx = 0; state.practiceState.answered = false; render(); },
   resetPracticeFilters: () => { state.practiceState = { idx: 0, answered: false, selected: "", difficulty: "ALL", retryOnly: false }; render(); },
   setPlayTopic: (topic) => { Object.assign(state.gameState,{playTopic:topic,playRound:null,playIndex:0,playScore:0,playAnswered:false,playSelected:"",playFeedback:""}); render(); },
+  setPlayMode: (mode) => { Object.assign(state.gameState,{playMode:mode,playRound:null,playIndex:0,playScore:0,playAnswered:false,playSelected:"",playFeedback:""}); render(); },
   answerTopicPlay: (index) => { const q=state.gameState.playRound?.[state.gameState.playIndex]; if(!q||state.gameState.playAnswered)return; state.gameState.playSelected=(q.options||[])[index]??""; render(); },
   submitTopicPlay: () => { const gs=state.gameState,q=gs.playRound?.[gs.playIndex]; if(!q||gs.playAnswered)return; const typed=document.getElementById("sp-play-answer")?.value||gs.playSelected||""; gs.playSelected=typed; gs.playAnswered=true; const ok=normalizeAns(typed)===normalizeAns(q.ans); if(ok)gs.playScore=(gs.playScore||0)+1; gs.playFeedback=ok?"Correct! Well done.":"Not quite. Review the explanation, then continue."; render(); },
   nextTopicPlay: () => { const gs=state.gameState; gs.playIndex++;gs.playAnswered=false;gs.playSelected="";gs.playFeedback="";render(); },

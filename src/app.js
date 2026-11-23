@@ -400,7 +400,7 @@ async function renderSubjectChapterWorkspace() {
   } else if (state.chapterTab === "PLAY") {
     tabBody = renderGamesTab(activeChapter, chGames, chQuestions);
   } else if (state.chapterTab === "TEST") {
-    tabBody = renderQuickChapterTestTab(sub, activeChapter, chQuestions);
+    tabBody = await renderQuickChapterTestTab(sub, activeChapter, chQuestions);
   }
 
   return `
@@ -449,6 +449,13 @@ async function renderPracticeTab(chapter, chQuestions) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+
+  const studentId = state.profile?.studentId;
+  if (!studentId) return '<p class="sp-card">Please sign in to save your practice work.</p>';
+  const savedAnswers = await Promise.all((chapter.exercises || []).map((ex, index) => {
+    const exerciseId = String(ex?.id || ex?.qNo || index + 1);
+    return dbGet("settings", `practice_answer::${studentId}::${chapter.id}::${exerciseId}`);
+  }));
 
   // Practice contains only the exercises supplied with this textbook chapter.
   const exercises = Array.isArray(chapter.exercises)
@@ -528,8 +535,8 @@ async function renderPracticeTab(chapter, chQuestions) {
               class="sp-textarea"
               rows="3"
               placeholder="Write your answer or working here..."
-              aria-label="Answer for question ${questionNo}">
-            </textarea>
+              aria-label="Answer for question ${questionNo}" onchange="window.SP.savePracticeAnswer(${i}, this.value)">${escapeHTML(savedAnswers[i]?.response || "")}</textarea>
+            <div style="font-size:.75rem;color:var(--text-muted);margin-top:5px;">Saved on this device when you leave the answer field.</div>
 
             ${ex.hint ? `
               <details style="margin-top:12px;padding:10px;border-radius:10px;background:var(--bg-muted);">
@@ -888,7 +895,7 @@ function renderGamesTab(chapter, chGames, chQuestions) {
     </div>
   `;
 }
-function renderQuickChapterTestTab(sub, chapter, chQuestions) {
+async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
   const escapeHTML = (value) => String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -902,6 +909,12 @@ function renderQuickChapterTestTab(sub, chapter, chQuestions) {
       )
     : [];
 
+  const studentId = state.profile?.studentId;
+  if (!studentId) return '<p class="sp-card">Please sign in to take a chapter test.</p>';
+  if (state.quickTest.chapterId !== chapter.id || state.quickTest.studentId !== studentId) {
+    const saved = await dbGet("settings", `chapter_test_draft::${studentId}::${chapter.id}`);
+    state.quickTest = saved?.value || { studentId, chapterId: chapter.id, answers: {}, submitted: false };
+  }
   const qt = state.quickTest;
 
   const getQuestionKey = (index) =>
@@ -1477,7 +1490,7 @@ window.SP = {
     state.chapterTab = tab;
     state.practiceState = { idx: 0, answered: false, selected: "", difficulty: "ALL", retryOnly: false };
     state.gameState = { mode: "playcard", cardIdx: 0, flipped: false, matchData: null, matchLeft: null, matchedIds: [], matchFeedback: "", activeGame: null, level: 1, score: 0, round: null, feedback: "" };
-    state.quickTest = { answers: {}, submitted: false };
+    state.quickTest = { studentId: state.profile?.studentId, chapterId: chId, answers: {}, submitted: false };
     state.view = "learn";
     render();
   },
@@ -1591,9 +1604,53 @@ window.SP = {
     }
     render();
   },
-  setQuickTestAns: (qId, val) => { state.quickTest.answers[qId] = val; render(); },
-  submitQuickTest: () => { state.quickTest.submitted = true; render(); },
-  resetQuickTest: () => { state.quickTest = { answers: {}, submitted: false }; render(); },
+  savePracticeAnswer: async (index, response) => {
+    const chapter = state.curriculum?.chapters.find((item) => item.id === state.selectedChapterId);
+    const exercise = chapter?.exercises?.[index];
+    const studentId = state.profile?.studentId;
+    if (!chapter || !exercise || !studentId) return;
+    const exerciseId = String(exercise.id || exercise.qNo || index + 1);
+    await dbPut("settings", { key: `practice_answer::${studentId}::${chapter.id}::${exerciseId}`, studentId, chapterId: chapter.id, exerciseId, response: String(response ?? ""), updatedAt: new Date().toISOString() });
+    showToast("Practice answer saved on this device.", "success");
+  },
+  setQuickTestAns: async (qId, val) => {
+    if (state.quickTest.submitted) return;
+    state.quickTest.answers[qId] = val;
+    const studentId = state.profile?.studentId;
+    const chapterId = state.quickTest.chapterId || state.selectedChapterId;
+    if (studentId && chapterId) {
+      state.quickTest.studentId = studentId;
+      state.quickTest.chapterId = chapterId;
+      await dbPut("settings", { key: `chapter_test_draft::${studentId}::${chapterId}`, value: state.quickTest });
+    }
+    render();
+  },
+  submitQuickTest: async () => {
+    const qt = state.quickTest;
+    if (qt.submitted) return;
+    const student = state.profile;
+    const chapter = state.curriculum?.chapters.find((item) => item.id === state.selectedChapterId);
+    if (!student || !chapter || qt.chapterId !== chapter.id) return;
+    const exercises = (chapter.exercises || []).filter((ex) => ex && typeof ex.q === "string" && ex.q.trim());
+    const gradable = exercises.filter((ex) => String(ex.ans ?? "").trim());
+    const correct = gradable.filter((ex) => normalizeAns(qt.answers[`booktest-${chapter.id}-${exercises.indexOf(ex)}`] || "") === normalizeAns(ex.ans));
+    const score = correct.reduce((sum, ex) => sum + Number(ex.marks || 1), 0);
+    const totalMarks = gradable.reduce((sum, ex) => sum + Number(ex.marks || 1), 0);
+    const attemptId = `chapter_test_${student.studentId}_${chapter.id}_${Date.now()}`;
+    const attempt = { attemptId, studentId: student.studentId, studentName: student.name, classNum: student.classNum, board: student.board, medium: student.medium, type: "chapter_test", chapterId: chapter.id, title: chapter.title, score, totalMarks, questionCount: exercises.length, gradableCount: gradable.length, answers: { ...qt.answers }, evaluationStatus: gradable.length === exercises.length ? "evaluated" : "pending_teacher_review", createdAt: new Date().toISOString() };
+    await dbPut("studentAttempts", attempt);
+    qt.submitted = true;
+    qt.attemptId = attemptId;
+    await dbPut("settings", { key: `chapter_test_draft::${student.studentId}::${chapter.id}`, value: qt });
+    showToast("Chapter test submitted and saved on this device.", "success");
+    render();
+  },
+  resetQuickTest: async () => {
+    const studentId = state.profile?.studentId, chapterId = state.selectedChapterId;
+    if (studentId && chapterId) await dbPut("settings", { key: `chapter_test_draft::${studentId}::${chapterId}`, value: { studentId, chapterId, answers: {}, submitted: false } });
+    state.quickTest = { studentId, chapterId, answers: {}, submitted: false };
+    render();
+  },
   playGameAnswer: async (opt) => {
     const gs = state.gameState;
     if (!gs.round) return;

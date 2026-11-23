@@ -532,7 +532,7 @@ export function buildMathsChapterContent(classNum, medium, chTitle) {
       q("Perimeter is measured in:", "परिमाप मापा जाता है:", ["Linear units","Square units","Cubic units","Litres"], "Linear units", "Perimeter is a length."),
       q("Area is measured in:", "क्षेत्रफल मापा जाता है:", ["Linear units","Square units","Cubic units","Kilograms"], "Square units", "Area uses square units.")
     ];
-  } else if (/addition|subtraction|जोड़|घटाव|give and take|making 10|mango treat|vegetable farm/.test(key)) {
+  } else if (/addition|subtraction|जोड़|घटाव|give and take|making 10|vegetable farm/.test(key)) {
     topic = "Addition and Subtraction";
     concepts = [{ term: "Addition", def: "Combining quantities to find a total." }, { term: "Subtraction", def: "Finding the difference or what remains after taking away." }];
     examples = [{ q: "Calculate 458+267.", a: "458+267=725." }];
@@ -546,7 +546,7 @@ export function buildMathsChapterContent(classNum, medium, chTitle) {
       q("A shop sold 245 items in the morning and 178 in the evening. Total sold:", "दुकान ने सुबह 245 और शाम 178 वस्तुएँ बेचीं। कुल:", ["413","423","433","443"], "423", "245+178=423."),
       q("Subtracting zero from a number leaves:", "किसी संख्या में से शून्य घटाने पर:", ["0","The same number","1","Double the number"], "The same number", "a−0=a.")
     ];
-  } else if (/multiplication|division|grouping and sharing|equal groups|how many times|double century|गुणा|भाग|समूह बनाना|बराबर समूह/.test(key)) {
+  } else if (/multiplication|division|grouping and sharing|equal groups|how many times|गुणा|भाग|समूह बनाना|बराबर समूह/.test(key)) {
     topic = "Multiplication and Division";
     concepts = [{ term: "Multiplication", def: "Repeated addition of equal groups." }, { term: "Division", def: "Sharing or grouping a quantity into equal parts." }];
     examples = [{ q: "Find 24×5.", a: "24×5=120." }];
@@ -560,7 +560,7 @@ export function buildMathsChapterContent(classNum, medium, chTitle) {
       q("36 objects arranged in 4 equal rows give objects per row:", "36 वस्तुओं को 4 बराबर पंक्तियों में रखने पर प्रत्येक पंक्ति में:", ["8","9","10","12"], "9", "36÷4=9."),
       q("The remainder when 29 is divided by 5 is:", "29 को 5 से भाग देने पर शेषफल है:", ["2","3","4","5"], "4", "29=5×5+4.")
     ];
-  } else if (/money|spend|rupee|rupees|fair|मुद्रा|रुपये|पैसे/.test(key)) {
+  } else if (/money|rupee|rupees|fun at the fair|how much can we spend|मुद्रा|रुपये|पैसे/.test(key)) {
     topic = "Money";
     concepts = [{ term: "Rupee", def: "The basic unit of Indian currency; 1 rupee = 100 paise." }, { term: "Total Cost", def: "Unit price multiplied by quantity." }];
     examples = [{ q: "Three notebooks cost ₹12 each. Find the total.", a: "3×12=₹36." }];
@@ -574,7 +574,7 @@ export function buildMathsChapterContent(classNum, medium, chTitle) {
       q("₹5.50 is equal to how many paise?", "₹5.50 में कितने पैसे हैं:", ["50","500","550","505"], "550", "5.50 rupees=550 paise."),
       q("Which is the greatest amount?", "सबसे बड़ी राशि कौन-सी है:", ["₹9.75","₹9.50","₹9.25","₹9.05"], "₹9.75", "Compare paise after the rupee value.")
     ];
-  } else if (/time|calendar|clock|day|season|समय|कैलेंडर|घड़ी|दिनचर्या/.test(key)) {
+  } else if (/time|calendar|clock|season|how do i spend my day|समय|कैलेंडर|घड़ी|दिनचर्या/.test(key)) {
     topic = "Time and Calendar";
     concepts = [{ term: "Hour", def: "1 hour = 60 minutes." }, { term: "Day", def: "1 day = 24 hours." }];
     examples = [{ q: "Convert 2 hours into minutes.", a: "2×60=120 minutes." }];
@@ -588,7 +588,7 @@ export function buildMathsChapterContent(classNum, medium, chTitle) {
       q("A day has how many hours?", "एक दिन में कितने घंटे होते हैं:", ["12","18","24","36"], "24", "One day has 24 hours."),
       q("30 minutes after 4:15 is:", "4:15 के 30 मिनट बाद समय होगा:", ["4:35","4:45","5:15","5:45"], "4:45", "Add 30 minutes.")
     ];
-  } else if (/pattern|number play|number system|numbers|number|integer|integer|गणित में पैटर्न|संख्याओं|पूर्णांक|संख्या/.test(key)) {
+  } else if (/pattern|number play|number system|numbers|number|integer|counting in tens|गणित में पैटर्न|संख्याओं|पूर्णांक|संख्या/.test(key)) {
     topic = "Number Patterns";
     concepts = [{ term: "Pattern", def: "A sequence that follows a rule." }, { term: "Integer", def: "Positive whole numbers, negative whole numbers, and zero." }];
     examples = [{ q: "Find the next number: 3,6,9,12,...", a: "15; add 3 each time." }];

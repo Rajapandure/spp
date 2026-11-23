@@ -6,7 +6,32 @@ import { generateFullSyllabusCoverage } from "./full_syllabus_generator.js";
 import { generateEnglishGrammarCurriculum } from "./grammar_curriculum.js";
 
 const SEED_VERSION_KEY = "curriculum_seed_version";
-const CURRENT_SEED_VERSION = "2026.27.v8";
+const CURRENT_SEED_VERSION = "2026.27.v9";
+const OFFICIAL_MATHS_SOURCES = {
+  NCERT: "https://ncert.nic.in/textbook.php",
+  EPATHSHALA: "https://epathshala.nic.in/topics.php",
+  DIKSHA: "https://diksha.gov.in/",
+  MPTBC: "https://mptbc.mp.gov.in/",
+  MPBSE: "https://mpbse.nic.in/academics.html"
+};
+
+function attachOfficialMathsSources(book) {
+  if (book.subjectId !== "maths") return book;
+  const isMP = book.board === "MP_BOARD";
+  return {
+    ...book,
+    sourceUrl: isMP ? OFFICIAL_MATHS_SOURCES.MPTBC : OFFICIAL_MATHS_SOURCES.NCERT,
+    sourceLabel: isMP ? "MP Textbook Corporation (MPTBC)" : "NCERT Official Textbooks",
+    supplementarySourceUrl: isMP ? OFFICIAL_MATHS_SOURCES.DIKSHA : OFFICIAL_MATHS_SOURCES.EPATHSHALA,
+    supplementarySourceLabel: isMP ? "DIKSHA – Madhya Pradesh" : "ePathshala – NCERT",
+    syllabusUrl: isMP && Number(book.classNum) >= 9 ? OFFICIAL_MATHS_SOURCES.MPBSE : OFFICIAL_MATHS_SOURCES.NCERT,
+    sourceAttribution: isMP
+      ? "Official MP textbook and syllabus reference. Book content remains subject to the publisher's terms."
+      : "Official NCERT textbook reference. Open the publisher's portal for the original book and exercises.",
+    contentPolicy: "LINK_TO_OFFICIAL_SOURCE"
+  };
+}
+
 
 export async function ensureCurriculumSeeded() {
   const existing = await dbGet("settings", SEED_VERSION_KEY);
@@ -29,7 +54,8 @@ export async function ensureCurriculumSeeded() {
   const { newBooks, newChapters, newQuestions } = generateFullSyllabusCoverage(baseBooks, baseChapters, baseQuestions);
   const grammar = generateEnglishGrammarCurriculum();
 
-  await dbBulkPut("textbooks", [...baseBooks, ...newBooks, ...grammar.books]);
+  const allBooks = [...baseBooks, ...newBooks, ...grammar.books].map(attachOfficialMathsSources);
+  await dbBulkPut("textbooks", allBooks);
   await dbBulkPut("chapters", [...baseChapters, ...newChapters, ...grammar.chapters]);
   await dbBulkPut("questions", [...baseQuestions, ...newQuestions, ...grammar.questions]);
   await dbBulkPut("games", [...p1.games, ...p2.games]);

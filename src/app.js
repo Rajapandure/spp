@@ -699,6 +699,16 @@ async function renderBooksManager() {
               <span class="sp-badge" style="background:${dl ? "#d1fae5" : "#f1f5f9"};color:${dl ? "#065f46" : "#475569"};">${dl ? "✓ Available Offline" : "Not Downloaded"}</span>
               <div style="display:flex;gap:6px;"><button class="sp-btn sp-btn-primary" style="min-height:36px;padding:0 12px;font-size:12px;" onclick="window.SP.openSubject('${b.subjectId}')">Read Book</button><button class="sp-btn ${dl ? "sp-btn-secondary" : "sp-btn-success"}" style="min-height:36px;padding:0 12px;font-size:12px;" onclick="window.SP.toggleOfflineBook('${b.id}')">${dl ? "Offline ✓" : "Download"}</button></div>
             </div>
+            \${b.subjectId === "maths" && b.sourceUrl ? \`
+              <div style="border-top:1px solid var(--border-color);padding-top:10px;display:grid;gap:6px;">
+                <div style="font-size:.76rem;font-weight:800;color:var(--text-secondary);">OFFICIAL TEXTBOOK SOURCES</div>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.8rem;">
+                  <a href="\${esc(b.sourceUrl)}" target="_blank" rel="noopener noreferrer">\${esc(b.sourceLabel || "Official textbook")} ↗</a>
+                  <a href="\${esc(b.supplementarySourceUrl || b.sourceUrl)}" target="_blank" rel="noopener noreferrer">\${esc(b.supplementarySourceLabel || "Digital resources")} ↗</a>
+                  <a href="\${esc(b.syllabusUrl || b.sourceUrl)}" target="_blank" rel="noopener noreferrer">Syllabus / academic updates ↗</a>
+                </div>
+                <div style="font-size:.72rem;color:var(--text-muted);">\${esc(b.sourceAttribution || "Open the official publisher portal for the original textbook.")}</div>
+              </div>\` : ""}
           </div>
         `).join("")}
       </div>

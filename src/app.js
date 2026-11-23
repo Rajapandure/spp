@@ -497,7 +497,10 @@ async function renderPracticeTab(chapter, chQuestions) {
         </p>
       </div>
 
-      ${exercises.map((ex, i) => {
+      ${Object.entries(exercises.reduce((groups, ex, i) => { const topic = String(ex.topic || ex.topicName || "Chapter Exercises"); (groups[topic] ||= []).push({ ex, i }); return groups; }, {})).map(([topic, entries]) => `
+        <section style="display:grid;gap:10px">
+          <h3 style="margin:10px 2px 0;font-size:1rem">📚 ${escapeHTML(topic)}</h3>
+          ${entries.map(({ex,i}) => {
         const questionNo = escapeHTML(ex.qNo || i + 1);
         const hasAnswer = Boolean(
           String(ex.ans ?? "").trim() ||
@@ -1161,9 +1164,12 @@ window.SP = {
     showToast("20-question test submitted and saved on this device.","success");render();
   },
   resetQuickTest: async () => {
-    const studentId = state.profile?.studentId, chapterId = state.selectedChapterId;
-    if (studentId && chapterId) await dbPut("settings", { key: `chapter_test_draft::${studentId}::${chapterId}`, value: { studentId, chapterId, answers: {}, submitted: false } });
-    state.quickTest = { studentId, chapterId, answers: {}, submitted: false };
+    const studentId=state.profile?.studentId,chapterId=state.selectedChapterId;
+    const chapter=state.curriculum?.chapters.find(c=>c.id===chapterId);
+    const questions=(state.curriculum?.questions||[]).filter(q=>q.chapterId===chapterId && String(q.q||"").trim() && String(q.ans??"").trim());
+    const fresh={studentId,chapterId,questions:[...questions].sort(()=>Math.random()-.5).slice(0,20),answers:{},submitted:false};
+    state.quickTest=fresh;
+    if(studentId&&chapterId)await dbPut("settings",{key:`chapter_test_draft::${studentId}::${chapterId}`,value:fresh});
     render();
   },
   playGameAnswer: async (opt) => {

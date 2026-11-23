@@ -452,17 +452,15 @@ async function renderPracticeTab(chapter, chQuestions) {
 
   const studentId = state.profile?.studentId;
   if (!studentId) return '<p class="sp-card">Please sign in to save your practice work.</p>';
-  const savedAnswers = await Promise.all((chapter.exercises || []).map((ex, index) => {
-    const exerciseId = String(ex?.id || ex?.qNo || index + 1);
-    return dbGet("settings", `practice_answer::${studentId}::${chapter.id}::${exerciseId}`);
-  }));
 
   // Practice contains only the exercises supplied with this textbook chapter.
   const exercises = Array.isArray(chapter.exercises)
-    ? chapter.exercises.filter(ex =>
-        ex && typeof ex.q === "string" && ex.q.trim()
-      )
+    ? chapter.exercises.filter(ex => ex && typeof ex.q === "string" && ex.q.trim())
     : [];
+  const savedAnswers = await Promise.all(exercises.map((ex, index) => {
+    const exerciseId = String(ex?.id || ex?.qNo || index + 1);
+    return dbGet("settings", `practice_answer::${studentId}::${chapter.id}::${exerciseId}`);
+  }));
 
   if (!exercises.length) {
     return `
@@ -1603,7 +1601,7 @@ window.SP = {
   },
   savePracticeAnswer: async (index, response) => {
     const chapter = state.curriculum?.chapters.find((item) => item.id === state.selectedChapterId);
-    const exercise = chapter?.exercises?.[index];
+    const exercise = (chapter?.exercises || []).filter((item) => item && typeof item.q === "string" && item.q.trim())[index];
     const studentId = state.profile?.studentId;
     if (!chapter || !exercise || !studentId) return;
     const exerciseId = String(exercise.id || exercise.qNo || index + 1);

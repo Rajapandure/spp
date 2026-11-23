@@ -6,5 +6,6 @@
     "build": "npm run check && npm test",
     "check": "node --check src/app.js && node --check src/games/gameEngine.js && node --check src/assessment/examEngine.js",
     "test": "node --test"
-  }
+  },
+  "type": "module"
 }

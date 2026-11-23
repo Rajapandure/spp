@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "npm run check && npm test",
-    "check": "node --check src/app.js && node --check src/games/gameEngine.js && node --check src/assessment/examEngine.js",
+    "check": "node --check src/app.js && node --check src/curriculum/curriculumService.js && node --check src/curriculum/full_syllabus_generator.js && node --check src/games/gameEngine.js && node --check src/assessment/examEngine.js",
     "test": "node --test"
   },
   "type": "module"

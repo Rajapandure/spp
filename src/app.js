@@ -1485,7 +1485,7 @@ window.SP = {
     state.chapterTab = tab;
     state.practiceState = { idx: 0, answered: false, selected: "", difficulty: "ALL", retryOnly: false };
     state.gameState = { mode: "playcard", cardIdx: 0, flipped: false, matchData: null, matchLeft: null, matchedIds: [], matchFeedback: "", activeGame: null, level: 1, score: 0, round: null, feedback: "" };
-    state.quickTest = { studentId: state.profile?.studentId, chapterId: chId, answers: {}, submitted: false };
+    state.quickTest = { answers: {}, submitted: false };
     state.view = "learn";
     render();
   },

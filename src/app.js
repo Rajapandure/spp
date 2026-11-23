@@ -466,9 +466,9 @@ async function renderPracticeTab(chapter, chQuestions) {
     return `
       <div class="sp-card" style="padding:24px;text-align:center;">
         <div style="font-size:2rem;margin-bottom:8px;">📖</div>
-        <h3>No Textbook Exercises Available</h3>
+        <h3>No Chapter Exercises Available</h3>
         <p style="color:var(--text-secondary);">
-          Verified exercises have not been added for
+          Exercises have not been added for
           <strong>${escapeHTML(chapter.title)}</strong> yet.
         </p>
         <p style="font-size:.82rem;color:var(--text-muted);">
@@ -625,7 +625,7 @@ function renderGamesTab(chapter, chGames, chQuestions) {
     </div>`;
   return `
     <div style="display:grid;gap:14px">
-      <div class="sp-card" style="padding:16px"><div style="font-weight:800">🎯 Topic Challenge · ${esc(chapter.title)}</div><p style="margin:5px 0 0;color:var(--text-muted);font-size:.84rem">Short interactive rounds built from this chapter's reviewed questions.</p>
+      <div class="sp-card" style="padding:16px"><div style="font-weight:800">🎯 Topic Challenge · ${esc(chapter.title)}</div><p style="margin:5px 0 0;color:var(--text-muted);font-size:.84rem">Interactive rounds built only from this chapter's mapped Maths questions.</p>
         <label style="display:block;font-size:.82rem;font-weight:700;margin-top:12px">Choose a game mode</label>
         <select class="sp-input" onchange="window.SP.setPlayMode(this.value)" style="margin-top:5px"><option value="sprint" ${gs.playMode==="sprint"?"selected":""}>⚡ Quick Sprint · 5 questions</option><option value="challenge" ${gs.playMode==="challenge"?"selected":""}>🎯 Topic Challenge · 10 questions</option><option value="mastery" ${!gs.playMode||gs.playMode==="mastery"?"selected":""}>🏆 Mastery Round · 20 questions</option></select>
         <label style="display:block;font-size:.82rem;font-weight:700;margin-top:12px">Choose a topic</label>
@@ -640,7 +640,7 @@ async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
   const studentId = state.profile?.studentId;
   if (!studentId) return '<p class="sp-card">Please sign in to take a chapter test.</p>';
   const pool = (chQuestions || []).filter(q => q && String(q.q || "").trim() && String(q.ans ?? "").trim());
-  if (!pool.length) return `<div class="sp-card" style="padding:20px"><h3>Chapter test is being prepared</h3><p>No reviewed questions are available for this chapter yet.</p></div>`;
+  if (!pool.length) return `<div class="sp-card" style="padding:20px"><h3>Chapter test is being prepared</h3><p>No chapter-specific questions are available for this chapter yet.</p></div>`;
   const draftKey = `chapter_test_draft::${studentId}::${chapter.id}`;
   if (state.quickTest.chapterId !== chapter.id || state.quickTest.studentId !== studentId || !Array.isArray(state.quickTest.questions)) {
     const saved = await dbGet("settings", draftKey);

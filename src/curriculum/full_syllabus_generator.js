@@ -532,7 +532,63 @@ export function buildMathsChapterContent(classNum, medium, chTitle) {
       q("Perimeter is measured in:", "परिमाप मापा जाता है:", ["Linear units","Square units","Cubic units","Litres"], "Linear units", "Perimeter is a length."),
       q("Area is measured in:", "क्षेत्रफल मापा जाता है:", ["Linear units","Square units","Cubic units","Kilograms"], "Square units", "Area uses square units.")
     ];
-  } else if (/pattern|number play|numbers|integer|गणित में पैटर्न|संख्याओं|पूर्णांक|संख्या/.test(key)) {
+  } else if (/addition|subtraction|जोड़|घटाव|give and take|making 10|mango treat|vegetable farm/.test(key)) {
+    topic = "Addition and Subtraction";
+    concepts = [{ term: "Addition", def: "Combining quantities to find a total." }, { term: "Subtraction", def: "Finding the difference or what remains after taking away." }];
+    examples = [{ q: "Calculate 458+267.", a: "458+267=725." }];
+    questions = [
+      q("458+267 equals:", "458+267 बराबर है:", ["715","725","735","745"], "725", "Add ones, tens and hundreds."),
+      q("900−375 equals:", "900−375 बराबर है:", ["515","525","535","545"], "525", "900−375=525."),
+      q("What must be added to 38 to make 100?", "38 में क्या जोड़ें कि 100 हो जाए:", ["52","62","72","82"], "62", "100−38=62."),
+      q("If 125 books are on one shelf and 86 on another, total books are:", "एक शेल्फ पर 125 और दूसरी पर 86 पुस्तकें हैं, कुल कितनी:", ["201","211","221","231"], "211", "125+86=211."),
+      q("The difference between 1000 and 648 is:", "1000 और 648 का अंतर है:", ["342","352","362","372"], "352", "1000−648=352."),
+      q("Which number makes 47+___=90?", "47+___=90 में रिक्त स्थान का मान है:", ["33","43","53","63"], "43", "90−47=43."),
+      q("A shop sold 245 items in the morning and 178 in the evening. Total sold:", "दुकान ने सुबह 245 और शाम 178 वस्तुएँ बेचीं। कुल:", ["413","423","433","443"], "423", "245+178=423."),
+      q("Subtracting zero from a number leaves:", "किसी संख्या में से शून्य घटाने पर:", ["0","The same number","1","Double the number"], "The same number", "a−0=a.")
+    ];
+  } else if (/multiplication|division|grouping and sharing|equal groups|how many times|double century|गुणा|भाग|समूह बनाना|बराबर समूह/.test(key)) {
+    topic = "Multiplication and Division";
+    concepts = [{ term: "Multiplication", def: "Repeated addition of equal groups." }, { term: "Division", def: "Sharing or grouping a quantity into equal parts." }];
+    examples = [{ q: "Find 24×5.", a: "24×5=120." }];
+    questions = [
+      q("24×5 equals:", "24×5 बराबर है:", ["100","110","120","125"], "120", "24 groups of 5 make 120."),
+      q("144÷12 equals:", "144÷12 बराबर है:", ["10","11","12","14"], "12", "12×12=144."),
+      q("8 groups of 6 make:", "6 के 8 समूहों में कुल हैं:", ["42","46","48","54"], "48", "8×6=48."),
+      q("If 45 sweets are shared equally among 5 children, each gets:", "45 मिठाइयाँ 5 बच्चों में बराबर बाँटने पर प्रत्येक को मिलेंगी:", ["8","9","10","11"], "9", "45÷5=9."),
+      q("The product of 13 and 7 is:", "13 और 7 का गुणनफल है:", ["81","91","101","111"], "91", "13×7=91."),
+      q("Which number makes 9×___=72?", "9×___=72 में रिक्त स्थान है:", ["6","7","8","9"], "8", "72÷9=8."),
+      q("36 objects arranged in 4 equal rows give objects per row:", "36 वस्तुओं को 4 बराबर पंक्तियों में रखने पर प्रत्येक पंक्ति में:", ["8","9","10","12"], "9", "36÷4=9."),
+      q("The remainder when 29 is divided by 5 is:", "29 को 5 से भाग देने पर शेषफल है:", ["2","3","4","5"], "4", "29=5×5+4.")
+    ];
+  } else if (/money|spend|rupee|rupees|fair|मुद्रा|रुपये|पैसे/.test(key)) {
+    topic = "Money";
+    concepts = [{ term: "Rupee", def: "The basic unit of Indian currency; 1 rupee = 100 paise." }, { term: "Total Cost", def: "Unit price multiplied by quantity." }];
+    examples = [{ q: "Three notebooks cost ₹12 each. Find the total.", a: "3×12=₹36." }];
+    questions = [
+      q("₹10 equals how many paise?", "₹10 में कितने पैसे होते हैं:", ["10","100","1000","10000"], "1000", "1 rupee=100 paise."),
+      q("Three notebooks cost ₹12 each. Total cost:", "तीन कॉपियों की कीमत ₹12 प्रति कॉपी है। कुल कीमत:", ["₹24","₹30","₹36","₹42"], "₹36", "3×12=36."),
+      q("You pay ₹100 for an item costing ₹68. Change:", "₹68 की वस्तु के लिए ₹100 देने पर वापस मिलेंगे:", ["₹22","₹28","₹32","₹38"], "₹32", "100−68=32."),
+      q("₹25+₹17 equals:", "₹25+₹17 बराबर है:", ["₹32","₹42","₹52","₹62"], "₹42", "25+17=42."),
+      q("Half of ₹80 is:", "₹80 का आधा है:", ["₹20","₹30","₹40","₹50"], "₹40", "80÷2=40."),
+      q("A pencil costs ₹7. Cost of 5 pencils:", "एक पेंसिल ₹7 की है। 5 पेंसिल की कीमत:", ["₹25","₹30","₹35","₹40"], "₹35", "7×5=35."),
+      q("₹5.50 is equal to how many paise?", "₹5.50 में कितने पैसे हैं:", ["50","500","550","505"], "550", "5.50 rupees=550 paise."),
+      q("Which is the greatest amount?", "सबसे बड़ी राशि कौन-सी है:", ["₹9.75","₹9.50","₹9.25","₹9.05"], "₹9.75", "Compare paise after the rupee value.")
+    ];
+  } else if (/time|calendar|clock|day|season|समय|कैलेंडर|घड़ी|दिनचर्या/.test(key)) {
+    topic = "Time and Calendar";
+    concepts = [{ term: "Hour", def: "1 hour = 60 minutes." }, { term: "Day", def: "1 day = 24 hours." }];
+    examples = [{ q: "Convert 2 hours into minutes.", a: "2×60=120 minutes." }];
+    questions = [
+      q("2 hours equals:", "2 घंटे बराबर हैं:", ["60 minutes","90 minutes","120 minutes","180 minutes"], "120 minutes", "2×60=120."),
+      q("How many days are in a leap year?", "लीप वर्ष में कितने दिन होते हैं:", ["364","365","366","367"], "366", "A leap year has 366 days."),
+      q("Quarter of an hour is:", "एक घंटे का चौथाई भाग है:", ["10 minutes","15 minutes","20 minutes","30 minutes"], "15 minutes", "60÷4=15."),
+      q("How many months are in a year?", "एक वर्ष में कितने महीने होते हैं:", ["10","11","12","13"], "12", "A year has 12 months."),
+      q("The minute hand completes one turn in:", "मिनट की सुई एक चक्कर पूरा करती है:", ["1 hour","12 hours","24 hours","1 minute"], "1 hour", "One full minute-hand turn is 60 minutes."),
+      q("3 weeks equal:", "3 सप्ताह बराबर हैं:", ["14 days","18 days","21 days","28 days"], "21 days", "3×7=21."),
+      q("A day has how many hours?", "एक दिन में कितने घंटे होते हैं:", ["12","18","24","36"], "24", "One day has 24 hours."),
+      q("30 minutes after 4:15 is:", "4:15 के 30 मिनट बाद समय होगा:", ["4:35","4:45","5:15","5:45"], "4:45", "Add 30 minutes.")
+    ];
+  } else if (/pattern|number play|number system|numbers|number|integer|integer|गणित में पैटर्न|संख्याओं|पूर्णांक|संख्या/.test(key)) {
     topic = "Number Patterns";
     concepts = [{ term: "Pattern", def: "A sequence that follows a rule." }, { term: "Integer", def: "Positive whole numbers, negative whole numbers, and zero." }];
     examples = [{ q: "Find the next number: 3,6,9,12,...", a: "15; add 3 each time." }];

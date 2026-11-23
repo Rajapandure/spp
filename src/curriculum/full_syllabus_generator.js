@@ -504,7 +504,7 @@ export function buildMathsChapterContent(classNum, medium, chTitle) {
       q("If two angles are 50° and 60°, the third angle is:", "यदि दो कोण 50° और 60° हैं, तो तीसरा कोण है:", ["60°","70°","80°","90°"], "70°", "180°−50°−60°=70°."),
       q("The area of a triangle is:", "त्रिभुज का क्षेत्रफल है:", ["base×height","½×base×height","2×base×height","base+height"], "½×base×height", "Area is half the product of base and corresponding height.")
     ];
-else if (/angle|line|geometry|shape|symmetry|circle|triangle|quadrilateral|आकृति|रेखा|कोण|सममिति|वृत्त|त्रिभुज/.test(key)) {
+  } else if (/angle|line|geometry|shape|symmetry|circle|triangle|quadrilateral|आकृति|रेखा|कोण|सममिति|वृत्त|त्रिभुज/.test(key)) {
     topic = "Geometry";
     concepts = [{ term: "Angle", def: "An angle is formed by two rays with a common endpoint." }, { term: "Perpendicular Lines", def: "Lines that intersect at 90°." }];
     examples = [{ q: "Find the complement of 35°.", a: "90°−35°=55°." }];

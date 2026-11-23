@@ -497,7 +497,7 @@ async function renderPracticeTab(chapter, chQuestions) {
         </p>
       </div>
 
-      ${Object.entries(exercises.reduce((groups, ex, i) => { const topic = String(ex.topic || ex.topicName || "Chapter Exercises"); (groups[topic] ||= []).push({ ex, i }); return groups; }, {})).map(([topic, entries]) => `
+      ${Object.entries(exercises.reduce((groups, ex, i) => { const matchedQuestion = (chQuestions || []).find(q => String(q.q || "").trim() === String(ex.q || "").trim()); const topic = String(ex.topic || ex.topicName || matchedQuestion?.topic || "Chapter Exercises"); (groups[topic] ||= []).push({ ex, i }); return groups; }, {})).map(([topic, entries]) => `
         <section style="display:grid;gap:10px">
           <h3 style="margin:10px 2px 0;font-size:1rem">📚 ${escapeHTML(topic)}</h3>
           ${entries.map(({ex,i}) => {

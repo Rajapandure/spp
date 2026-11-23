@@ -925,16 +925,13 @@ async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
   );
 
   let score = 0;
+  const totalMarks = gradableQs.reduce((sum, ex) => sum + Number(ex.marks || 1), 0);
 
   if (qt.submitted) {
     testQs.forEach((ex, index) => {
       if (!String(ex.ans ?? "").trim()) return;
-
       const given = qt.answers[getQuestionKey(index)] || "";
-
-      if (normalizeAns(given) === normalizeAns(ex.ans)) {
-        score++;
-      }
+      if (normalizeAns(given) === normalizeAns(ex.ans)) score += Number(ex.marks || 1);
     });
   }
 
@@ -1091,7 +1088,7 @@ async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
 
         ` : `
           <div style="text-align:center;padding:8px 0;">
-            <div style="font-size:2rem;">${gradableQs.length && score === gradableQs.length ? "🏆" : "📊"}</div>
+            <div style="font-size:2rem;">${gradableQs.length && score === totalMarks && totalMarks > 0 ? "🏆" : "📊"}</div>
 
             <h3 style="margin:8px 0;">
               Test Completed
@@ -1099,10 +1096,10 @@ async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
 
             ${gradableQs.length ? `
               <div style="font-size:1.8rem;font-weight:900;color:var(--accent-primary);">
-                ${score} / ${gradableQs.length}
+                ${score} / ${totalMarks}
               </div>
               <div style="font-size:.85rem;color:var(--text-muted);">
-                Auto-gradable questions
+                Auto-graded marks
               </div>
             ` : `
               <div style="font-size:.9rem;color:var(--text-muted);">

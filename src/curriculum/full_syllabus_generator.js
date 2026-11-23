@@ -448,7 +448,63 @@ export function buildMathsChapterContent(classNum, medium, chTitle) {
       q("A fraction with numerator smaller than denominator is:", "जिस भिन्न का अंश हर से छोटा हो वह है:", ["Proper fraction","Improper fraction","Mixed number","Integer"], "Proper fraction", "A proper fraction is less than one."),
       q("5/5 equals:", "5/5 बराबर है:", ["0","1","5","10"], "1", "Any non-zero number divided by itself is 1.")
     ];
-  } else if (/angle|line|geometry|shape|symmetry|circle|triangle|quadrilateral|आकृति|रेखा|कोण|सममिति|वृत्त|त्रिभुज/.test(key)) {
+  } else if (/area related to circles|वृत्तों से संबंधित क्षेत्रफल/.test(key)) {
+    topic = "Areas Related to Circles";
+    concepts = [{ term: "Circumference", def: "C=2πr." }, { term: "Area of a Circle", def: "A=πr²." }, { term: "Sector Area", def: "For central angle θ, area=(θ/360°)πr²." }];
+    examples = [{ q: "Find the area of a circle of radius 7 cm.", a: "π×7²=49π=154 cm² (using π=22/7)." }];
+    questions = [
+      q("Area of a circle of radius 7 cm (π=22/7) is:", "7 सेमी त्रिज्या वाले वृत्त का क्षेत्रफल (π=22/7) है:", ["44 cm²","154 cm²","308 cm²","49 cm²"], "154 cm²", "πr²=(22/7)×49=154."),
+      q("Circumference of a circle of radius 7 cm (π=22/7) is:", "7 सेमी त्रिज्या वाले वृत्त की परिधि है:", ["22 cm","44 cm","49 cm","154 cm"], "44 cm", "2πr=2×22/7×7=44."),
+      q("Area of a semicircle of radius r is:", "r त्रिज्या वाले अर्धवृत्त का क्षेत्रफल है:", ["πr²","½πr²","2πr","πr"], "½πr²", "A semicircle is half a circle."),
+      q("A sector of 90° is what fraction of a full circle?", "90° का त्रिज्यखंड पूरे वृत्त का कितना भाग है:", ["1/2","1/3","1/4","1/8"], "1/4", "90/360=1/4."),
+      q("If radius is doubled, area becomes:", "यदि त्रिज्या दोगुनी हो, तो क्षेत्रफल हो जाता है:", ["2 times","3 times","4 times","8 times"], "4 times", "Area is proportional to r²."),
+      q("Diameter of a circle with radius 5 cm is:", "5 सेमी त्रिज्या वाले वृत्त का व्यास है:", ["5 cm","10 cm","15 cm","25 cm"], "10 cm", "d=2r."),
+      q("Length of an arc of 180° is:", "180° के चाप की लंबाई है:", ["¼ circumference","½ circumference","Full circumference","Twice circumference"], "½ circumference", "A 180° arc is a semicircle."),
+      q("Area of a ring is:", "वलय का क्षेत्रफल है:", ["π(R²−r²)","π(R+r)²","2πR","πr²"], "π(R²−r²)", "Subtract the inner circle area from the outer circle area.")
+    ];
+  } else if (/surface area|volume|पृष्ठीय क्षेत्रफल|आयतन/.test(key)) {
+    topic = "Surface Areas and Volumes";
+    concepts = [{ term: "Cuboid Volume", def: "V=l×b×h." }, { term: "Cylinder Volume", def: "V=πr²h." }, { term: "Sphere Volume", def: "V=4/3πr³." }];
+    examples = [{ q: "Find the volume of a cube of side 3 cm.", a: "3³=27 cm³." }];
+    questions = [
+      q("Volume of a cube of side 3 cm is:", "3 सेमी भुजा वाले घन का आयतन है:", ["9 cm³","18 cm³","27 cm³","36 cm³"], "27 cm³", "V=a³=3³=27."),
+      q("Volume of a cuboid is:", "घनाभ का आयतन है:", ["l+b+h","2(lb+bh+hl)","l×b×h","4l"], "l×b×h", "Multiply length, breadth and height."),
+      q("Curved surface area of a cylinder is:", "बेलन का वक्र पृष्ठीय क्षेत्रफल है:", ["2πrh","πr²h","4πr²","πrl"], "2πrh", "CSA=2πrh."),
+      q("Volume of a cylinder is:", "बेलन का आयतन है:", ["2πrh","πr²h","4πr²","πrl"], "πr²h", "Volume=base area×height."),
+      q("Total surface area of a cube of side a is:", "a भुजा वाले घन का कुल पृष्ठीय क्षेत्रफल है:", ["4a²","6a²","a³","2a²"], "6a²", "A cube has six equal square faces."),
+      q("Volume of a sphere is:", "गोले का आयतन है:", ["4πr²","4/3πr³","πr²h","2πr"], "4/3πr³", "Standard sphere volume formula."),
+      q("The unit of volume is:", "आयतन की इकाई है:", ["cm","cm²","cm³","kg"], "cm³", "Volume is measured in cubic units."),
+      q("If each dimension of a cube is doubled, its volume becomes:", "यदि घन की प्रत्येक विमा दोगुनी हो, तो आयतन हो जाता है:", ["2 times","4 times","6 times","8 times"], "8 times", "Volume scales by 2³=8.")
+    ];
+  } else if (/circle|वृत्त/.test(key)) {
+    topic = "Circles";
+    concepts = [{ term: "Tangent", def: "A line that touches a circle at exactly one point." }, { term: "Radius and Tangent", def: "The radius through the point of contact is perpendicular to the tangent." }];
+    examples = [{ q: "A tangent touches a circle at how many points?", a: "Exactly one point." }];
+    questions = [
+      q("A tangent touches a circle at:", "स्पर्श रेखा वृत्त को कितने बिंदुओं पर छूती है:", ["One point","Two points","Three points","No point"], "One point", "A tangent has exactly one point of contact."),
+      q("The radius through the point of contact is _____ to the tangent:", "स्पर्श बिंदु पर त्रिज्या स्पर्श रेखा पर _____ होती है:", ["Parallel","Perpendicular","Equal","Oblique"], "Perpendicular", "The radius is at 90° to the tangent."),
+      q("Number of tangents from an external point to a circle is:", "वृत्त के बाहर स्थित बिंदु से खींची जा सकने वाली स्पर्श रेखाएँ हैं:", ["0","1","2","3"], "2", "Two tangents can be drawn from an external point."),
+      q("Tangents drawn from the same external point are:", "एक ही बाहरी बिंदु से खींची गई स्पर्श रेखाएँ होती हैं:", ["Equal","Unequal","Parallel","Perpendicular"], "Equal", "Lengths of tangents from an external point are equal."),
+      q("A line intersecting a circle at two points is a:", "वृत्त को दो बिंदुओं पर काटने वाली रेखा है:", ["Tangent","Secant","Radius","Chord only"], "Secant", "A secant intersects the circle at two points."),
+      q("The longest chord of a circle is its:", "वृत्त की सबसे लंबी जीवा है:", ["Radius","Diameter","Arc","Tangent"], "Diameter", "The diameter passes through the centre."),
+      q("A tangent is perpendicular to the radius at:", "स्पर्श रेखा त्रिज्या पर कहाँ लंब होती है:", ["Centre","Point of contact","Any point","Outside point"], "Point of contact", "The right angle occurs at the point of contact."),
+      q("If two tangents from P touch a circle at A and B, then:", "यदि P से खींची गई स्पर्श रेखाएँ A और B पर छूती हैं, तो:", ["PA=PB","PA>PB","PA<PB","PA+PB=0"], "PA=PB", "Tangents from an external point have equal lengths.")
+    ];
+  } else if (/triangle|त्रिभुज/.test(key)) {
+    topic = "Triangles";
+    concepts = [{ term: "Similarity", def: "Similar triangles have equal corresponding angles and proportional corresponding sides." }, { term: "Pythagoras Theorem", def: "In a right triangle, hypotenuse² = base² + perpendicular²." }];
+    examples = [{ q: "A right triangle has legs 3 cm and 4 cm. Find the hypotenuse.", a: "√(3²+4²)=5 cm." }];
+    questions = [
+      q("Sum of the interior angles of a triangle is:", "त्रिभुज के आंतरिक कोणों का योग है:", ["90°","180°","270°","360°"], "180°", "The angle sum property is 180°."),
+      q("In a right triangle with legs 3 and 4, hypotenuse is:", "3 और 4 भुजाओं वाले समकोण त्रिभुज का कर्ण है:", ["5","6","7","8"], "5", "√(3²+4²)=5."),
+      q("Similar triangles have corresponding angles:", "समरूप त्रिभुजों के संगत कोण होते हैं:", ["Equal","Supplementary","Complementary","Unequal"], "Equal", "Corresponding angles are equal."),
+      q("If corresponding sides are in ratio 2:3, their perimeters are in ratio:", "यदि संगत भुजाओं का अनुपात 2:3 है, तो परिमापों का अनुपात है:", ["2:3","4:9","3:2","1:1"], "2:3", "Perimeters of similar triangles follow the side ratio."),
+      q("A triangle with all three sides equal is:", "तीनों भुजाएँ समान वाला त्रिभुज है:", ["Equilateral","Isosceles","Scalene","Right"], "Equilateral", "All three sides are equal."),
+      q("The longest side of a right triangle is called:", "समकोण त्रिभुज की सबसे लंबी भुजा कहलाती है:", ["Base","Altitude","Hypotenuse","Median"], "Hypotenuse", "The hypotenuse is opposite the right angle."),
+      q("If two angles are 50° and 60°, the third angle is:", "यदि दो कोण 50° और 60° हैं, तो तीसरा कोण है:", ["60°","70°","80°","90°"], "70°", "180°−50°−60°=70°."),
+      q("The area of a triangle is:", "त्रिभुज का क्षेत्रफल है:", ["base×height","½×base×height","2×base×height","base+height"], "½×base×height", "Area is half the product of base and corresponding height.")
+    ];
+else if (/angle|line|geometry|shape|symmetry|circle|triangle|quadrilateral|आकृति|रेखा|कोण|सममिति|वृत्त|त्रिभुज/.test(key)) {
     topic = "Geometry";
     concepts = [{ term: "Angle", def: "An angle is formed by two rays with a common endpoint." }, { term: "Perpendicular Lines", def: "Lines that intersect at 90°." }];
     examples = [{ q: "Find the complement of 35°.", a: "90°−35°=55°." }];

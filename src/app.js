@@ -893,7 +893,7 @@ function renderGamesTab(chapter, chGames, chQuestions) {
     </div>
   `;
 }
-async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
+async async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
   const escapeHTML = (value) => String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")

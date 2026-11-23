@@ -15,7 +15,7 @@ const OFFICIAL_MATHS_SOURCES = {
   MPBSE: "https://mpbse.nic.in/academics.html"
 };
 
-function attachOfficialMathsSources(book) {
+export function attachOfficialMathsSources(book) {
   if (book.subjectId !== "maths") return book;
   const isMP = book.board === "MP_BOARD";
   return {

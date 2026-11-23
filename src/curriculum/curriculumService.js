@@ -1,16 +1,51 @@
 // Curriculum Service: Seeding, Strict Scoping by (session, board, medium, classNum), and Completeness Audit
-import { dbBulkPut, dbGet, dbGetAll, dbPut } from "../db/database.js";
+import { dbBulkPut, dbDelete, dbGet, dbGetAll, dbPut } from "../db/database.js";
 import { getSeedPart1 } from "./seed_part1.js";
 import { getSeedPart2 } from "./seed_part2.js";
 import { generateFullSyllabusCoverage } from "./full_syllabus_generator.js";
 import { generateEnglishGrammarCurriculum } from "./grammar_curriculum.js";
 
 const SEED_VERSION_KEY = "curriculum_seed_version";
-const CURRENT_SEED_VERSION = "2026.27.v7";
+const CURRENT_SEED_VERSION = "2026.27.v9";
+const OFFICIAL_MATHS_SOURCES = {
+  NCERT: "https://ncert.nic.in/textbook.php",
+  EPATHSHALA: "https://epathshala.nic.in/",
+  DIKSHA: "https://diksha.gov.in/",
+  MPTBC: "https://mptbc.mp.gov.in/",
+  MPBSE: "https://mpbse.nic.in/academics.html",
+  CBSE: "https://cbseacademic.nic.in/",
+  NCERT_HOME: "https://ncert.nic.in/"
+};
+
+export function attachOfficialMathsSources(book) {
+  if (book.subjectId !== "maths") return book;
+  const isMP = book.board === "MP_BOARD";
+  return {
+    ...book,
+    sourceUrl: isMP ? OFFICIAL_MATHS_SOURCES.MPTBC : OFFICIAL_MATHS_SOURCES.NCERT,
+    sourceLabel: isMP ? "MP Textbook Corporation (MPTBC)" : "NCERT Official Textbooks",
+    supplementarySourceUrl: isMP ? OFFICIAL_MATHS_SOURCES.DIKSHA : OFFICIAL_MATHS_SOURCES.EPATHSHALA,
+    supplementarySourceLabel: isMP ? "DIKSHA – Madhya Pradesh" : "ePathshala – NCERT",
+    syllabusUrl: isMP ? OFFICIAL_MATHS_SOURCES.MPBSE : (book.board === "CBSE" ? OFFICIAL_MATHS_SOURCES.CBSE : OFFICIAL_MATHS_SOURCES.NCERT_HOME),
+    sourceAttribution: isMP
+      ? "Official MP textbook and syllabus reference. Book content remains subject to the publisher's terms."
+      : "Official NCERT textbook reference. Open the publisher's portal for the original book and exercises.",
+    contentPolicy: "LINK_TO_OFFICIAL_SOURCE"
+  };
+}
+
 
 export async function ensureCurriculumSeeded() {
   const existing = await dbGet("settings", SEED_VERSION_KEY);
   if (existing && existing.value === CURRENT_SEED_VERSION) return;
+
+  // Remove legacy auto-padded Maths questions from older seed versions. These mixed topics
+  // into unrelated chapters (for example, HCF/LCM into Coordinate Geometry).
+  const storedQuestions = await dbGetAll("questions");
+  const legacyMathsFillers = storedQuestions.filter((q) =>
+    q.subjectId === "maths" && String(q.id || "").startsWith("q-sub-")
+  );
+  await Promise.all(legacyMathsFillers.map((q) => dbDelete("questions", q.id)));
 
   const p1 = getSeedPart1();
   const p2 = getSeedPart2();
@@ -21,7 +56,8 @@ export async function ensureCurriculumSeeded() {
   const { newBooks, newChapters, newQuestions } = generateFullSyllabusCoverage(baseBooks, baseChapters, baseQuestions);
   const grammar = generateEnglishGrammarCurriculum();
 
-  await dbBulkPut("textbooks", [...baseBooks, ...newBooks, ...grammar.books]);
+  const allBooks = [...baseBooks, ...newBooks, ...grammar.books].map(attachOfficialMathsSources);
+  await dbBulkPut("textbooks", allBooks);
   await dbBulkPut("chapters", [...baseChapters, ...newChapters, ...grammar.chapters]);
   await dbBulkPut("questions", [...baseQuestions, ...newQuestions, ...grammar.questions]);
   await dbBulkPut("games", [...p1.games, ...p2.games]);

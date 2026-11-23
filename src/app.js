@@ -36,7 +36,7 @@ const state = {
   chapterTab: "LEARN", // LEARN | PRACTICE | EXERCISE | PLAY | TEST
   readerFontSize: 16,
   practiceState: { idx: 0, answered: false, selected: "", difficulty: "ALL", retryOnly: false },
-  gameState: { mode: "playcard", cardIdx: 0, flipped: false, matchData: null, matchLeft: null, matchedIds: [], matchFeedback: "", activeGame: null, level: 1, score: 0, round: null, feedback: "" },
+  gameState: { mode: "playcard", playMode: "mastery", cardIdx: 0, flipped: false, matchData: null, matchLeft: null, matchedIds: [], matchFeedback: "", activeGame: null, level: 1, score: 0, round: null, feedback: "" },
   quickTest: { answers: {}, submitted: false },
   examState: { paper: null, answers: {}, currentIdx: 0, secondsLeft: 0, timerId: null, lastResult: null },
   darkMode: false
@@ -452,6 +452,10 @@ async function renderPracticeTab(chapter, chQuestions) {
 
   const studentId = state.profile?.studentId;
   if (!studentId) return '<p class="sp-card">Please sign in to save your practice work.</p>';
+  const sourceBook = (state.curriculum?.books || []).find((book) => book.id === chapter.bookId);
+  const officialBookLink = sourceBook?.sourceUrl
+    ? '<a href="' + escapeHTML(sourceBook.sourceUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHTML(sourceBook.sourceLabel || "Official textbook") + ' ↗</a>'
+    : "";
 
   // Practice contains only the exercises supplied with this textbook chapter.
   const exercises = Array.isArray(chapter.exercises)
@@ -466,15 +470,15 @@ async function renderPracticeTab(chapter, chQuestions) {
     return `
       <div class="sp-card" style="padding:24px;text-align:center;">
         <div style="font-size:2rem;margin-bottom:8px;">📖</div>
-        <h3>No Textbook Exercises Available</h3>
+        <h3>No Chapter Exercises Available</h3>
         <p style="color:var(--text-secondary);">
-          Verified exercises have not been added for
+          Exercises have not been added for
           <strong>${escapeHTML(chapter.title)}</strong> yet.
         </p>
         <p style="font-size:.82rem;color:var(--text-muted);">
-          This section will display the actual textbook exercises when your
-          teacher adds them. Unrelated questions will not be shown.
+          The official book contains the source exercises. They are not yet imported into this offline practice list; questions from other chapters will never be substituted.
         </p>
+        ${officialBookLink ? '<p style="margin:12px 0 0;">' + officialBookLink + '</p>' : ""}
       </div>
     `;
   }
@@ -486,15 +490,16 @@ async function renderPracticeTab(chapter, chQuestions) {
         <div style="display:flex;align-items:center;gap:12px;">
           <div style="font-size:2rem;">📚</div>
           <div>
-            <h3 style="margin:0;">Textbook Practice</h3>
+            <h3 style="margin:0;">Chapter Exercises</h3>
             <div style="font-size:.83rem;color:var(--text-muted);">
-              ${exercises.length} exercise(s) · Original textbook order
+              ${exercises.length} available exercise(s) · Chapter-specific content
             </div>
           </div>
         </div>
         <p style="font-size:.84rem;color:var(--text-secondary);margin:10px 0 0;">
-          Attempt each question yourself before opening its hint or solution.
+          Work through every exercise currently imported for this chapter. Open hints and solutions only after attempting the question.
         </p>
+        ${officialBookLink ? '<p style="margin:10px 0 0;font-size:.84rem;">Need the complete publisher exercise list? ' + officialBookLink + '</p>' : ""}
       </div>
 
       ${Object.entries(exercises.reduce((groups, ex, i) => { const matchedQuestion = (chQuestions || []).find(q => String(q.q || "").trim() === String(ex.q || "").trim()); const topic = String(ex.topic || ex.topicName || matchedQuestion?.topic || "Chapter Exercises"); (groups[topic] ||= []).push({ ex, i }); return groups; }, {})).map(([topic, entries]) => `
@@ -590,21 +595,21 @@ async function renderPracticeTab(chapter, chQuestions) {
 function renderGamesTab(chapter, chGames, chQuestions) {
   const gs = state.gameState;
   const esc = (v) => String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-  const topics = [...new Set((chapter.exercises || []).map((q) => String(q.topic || q.topicName || "").trim()).filter(Boolean))];
   const questions = (chQuestions || []).filter((q) => q && String(q.q || "").trim() && String(q.ans ?? "").trim());
   const chapterExercises = (chapter.exercises || []).filter((q) => q && String(q.q || "").trim() && String(q.ans ?? "").trim());
   const pool = questions.length ? questions : chapterExercises.map((q,i)=>({id:q.id || `exercise-${i}`,chapterId:chapter.id,topic:q.topic || "Chapter practice",type:"MCQ",difficulty:"Easy",marks:q.marks || 1,q:q.q,options:q.options,ans:q.ans,explanation:q.explanation || q.steps}));
   const filtered = gs.playTopic && gs.playTopic !== "ALL" ? pool.filter(q => (q.topic || "General") === gs.playTopic) : pool;
   const topicList = [...new Set(pool.map(q => q.topic || "General"))];
+  const roundLimit = gs.playMode === "sprint" ? 5 : gs.playMode === "challenge" ? 10 : 20;
   if (!filtered.length) return `<div class="sp-card" style="padding:20px"><h3>Topic practice is being prepared</h3><p>Reviewed interactive questions for this chapter will appear here. No unrelated questions are added.</p></div>`;
-  if (!gs.playRound || gs.playChapterId !== chapter.id || gs.playTopicSnapshot !== (gs.playTopic || "ALL")) {
-    gs.playChapterId = chapter.id; gs.playTopicSnapshot = gs.playTopic || "ALL"; gs.playIndex = 0; gs.playScore = 0; gs.playAnswered = false; gs.playFeedback = "";
-    gs.playRound = [...filtered].sort(()=>Math.random()-.5).slice(0,Math.min(20,filtered.length));
+  if (!gs.playRound || gs.playChapterId !== chapter.id || gs.playTopicSnapshot !== (gs.playTopic || "ALL") || gs.playModeSnapshot !== (gs.playMode || "mastery")) {
+    gs.playChapterId = chapter.id; gs.playTopicSnapshot = gs.playTopic || "ALL"; gs.playModeSnapshot = gs.playMode || "mastery"; gs.playIndex = 0; gs.playScore = 0; gs.playAnswered = false; gs.playFeedback = ""; gs.playSelected = "";
+    gs.playRound = [...filtered].sort(()=>Math.random()-.5).slice(0,Math.min(roundLimit,filtered.length));
   }
-  const q = gs.playRound[gs.playIndex];
   const total = gs.playRound.length;
-  const options = Array.isArray(q.options) && q.options.length >= 2 ? q.options : [];
   const isDone = gs.playIndex >= total;
+  const q = isDone ? null : gs.playRound[gs.playIndex];
+  const options = q && Array.isArray(q.options) && q.options.length >= 2 ? q.options : [];
   const answer = gs.playSelected ?? "";
   const feedback = gs.playFeedback || "";
   const progress = isDone ? 100 : Math.round((gs.playIndex/total)*100);
@@ -625,12 +630,14 @@ function renderGamesTab(chapter, chGames, chQuestions) {
     </div>`;
   return `
     <div style="display:grid;gap:14px">
-      <div class="sp-card" style="padding:16px"><div style="font-weight:800">🎯 Topic Challenge · ${esc(chapter.title)}</div><p style="margin:5px 0 0;color:var(--text-muted);font-size:.84rem">Short interactive rounds built from this chapter's reviewed questions.</p>
+      <div class="sp-card" style="padding:16px"><div style="font-weight:800">🎯 Topic Challenge · ${esc(chapter.title)}</div><p style="margin:5px 0 0;color:var(--text-muted);font-size:.84rem">Interactive rounds built only from this chapter's mapped Maths questions.</p>
+        <label style="display:block;font-size:.82rem;font-weight:700;margin-top:12px">Choose a game mode</label>
+        <select class="sp-input" onchange="window.SP.setPlayMode(this.value)" style="margin-top:5px"><option value="sprint" ${gs.playMode==="sprint"?"selected":""}>⚡ Quick Sprint · 5 questions</option><option value="challenge" ${gs.playMode==="challenge"?"selected":""}>🎯 Topic Challenge · 10 questions</option><option value="mastery" ${!gs.playMode||gs.playMode==="mastery"?"selected":""}>🏆 Mastery Round · 20 questions</option></select>
         <label style="display:block;font-size:.82rem;font-weight:700;margin-top:12px">Choose a topic</label>
         <select class="sp-input" onchange="window.SP.setPlayTopic(this.value)" style="margin-top:5px"><option value="ALL" ${!gs.playTopic||gs.playTopic==="ALL"?"selected":""}>All topics</option>${topicList.map(t=>`<option value="${esc(t)}" ${gs.playTopic===t?"selected":""}>${esc(t)}</option>`).join("")}</select>
       </div>
       <div class="sp-card" style="padding:18px">${body}</div>
-      <div style="font-size:.78rem;color:var(--text-muted)">Question pool: ${filtered.length} reviewed question(s). This round uses up to 20 unique questions.</div>
+      <div style="font-size:.78rem;color:var(--text-muted)">Question pool: ${filtered.length} chapter-mapped question(s). This mode uses up to ${roundLimit} unique questions; it never fills gaps with another chapter’s content.</div>
     </div>`;
 }
 async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
@@ -638,7 +645,7 @@ async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
   const studentId = state.profile?.studentId;
   if (!studentId) return '<p class="sp-card">Please sign in to take a chapter test.</p>';
   const pool = (chQuestions || []).filter(q => q && String(q.q || "").trim() && String(q.ans ?? "").trim());
-  if (!pool.length) return `<div class="sp-card" style="padding:20px"><h3>Chapter test is being prepared</h3><p>No reviewed questions are available for this chapter yet.</p></div>`;
+  if (!pool.length) return `<div class="sp-card" style="padding:20px"><h3>Chapter test is being prepared</h3><p>No chapter-specific questions are available for this chapter yet.</p></div>`;
   const draftKey = `chapter_test_draft::${studentId}::${chapter.id}`;
   if (state.quickTest.chapterId !== chapter.id || state.quickTest.studentId !== studentId || !Array.isArray(state.quickTest.questions)) {
     const saved = await dbGet("settings", draftKey);
@@ -654,8 +661,8 @@ async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
   const total=questions.reduce((sum,q)=>sum+Number(q.marks||1),0);
   return `
   <div style="display:grid;gap:14px">
-    <div class="sp-card" style="padding:16px"><h3 style="margin:0">${esc(chapter.title)} · 20-question chapter test</h3>
-      <p style="margin:6px 0;color:var(--text-muted);font-size:.84rem">${questions.length} reviewed questions · ${total} marks · answers saved on this device</p>
+    <div class="sp-card" style="padding:16px"><h3 style="margin:0">${esc(chapter.title)} · Chapter test</h3>
+      <p style="margin:6px 0;color:var(--text-muted);font-size:.84rem">${questions.length} chapter-mapped questions · ${total} marks · answers saved on this device</p>
       <div style="height:8px;background:var(--bg-muted);border-radius:99px;overflow:hidden"><div style="height:8px;width:${Math.round(Object.keys(qt.answers||{}).length/questions.length*100)}%;background:var(--accent-primary)"></div></div>
     </div>
     ${questions.map((q,i)=>{const id=q.id||String(i),given=qt.answers[id]||"",opts=Array.isArray(q.options)?q.options:[];return `
@@ -665,7 +672,7 @@ async function renderQuickChapterTestTab(sub, chapter, chQuestions) {
       ${qt.submitted?`<p style="font-size:.82rem;margin-top:8px">${normalizeAns(given)===normalizeAns(q.ans)?"✓ Correct":`Correct answer: ${esc(q.ans)}`}</p>`:""}
       </article>`;}).join("")}
     <div class="sp-card" style="padding:16px">
-      ${qt.submitted?`<h3>Result: ${score} / ${total}</h3><p>Attempt saved on this device.</p><button class="sp-btn sp-btn-primary" onclick="window.SP.resetQuickTest()">Retake test</button>`:`<button class="sp-btn sp-btn-primary" onclick="window.SP.submitQuickTest()">Submit 20-question test</button>`}
+      ${qt.submitted?`<h3>Result: ${score} / ${total}</h3><p>Attempt saved on this device.</p><button class="sp-btn sp-btn-primary" onclick="window.SP.resetQuickTest()">Retake test</button>`:`<button class="sp-btn sp-btn-primary" onclick="window.SP.submitQuickTest()">Submit chapter test (${questions.length} questions)</button>`}
     </div>
   </div>`;
 }
@@ -697,6 +704,16 @@ async function renderBooksManager() {
               <span class="sp-badge" style="background:${dl ? "#d1fae5" : "#f1f5f9"};color:${dl ? "#065f46" : "#475569"};">${dl ? "✓ Available Offline" : "Not Downloaded"}</span>
               <div style="display:flex;gap:6px;"><button class="sp-btn sp-btn-primary" style="min-height:36px;padding:0 12px;font-size:12px;" onclick="window.SP.openSubject('${b.subjectId}')">Read Book</button><button class="sp-btn ${dl ? "sp-btn-secondary" : "sp-btn-success"}" style="min-height:36px;padding:0 12px;font-size:12px;" onclick="window.SP.toggleOfflineBook('${b.id}')">${dl ? "Offline ✓" : "Download"}</button></div>
             </div>
+            \${b.subjectId === "maths" && b.sourceUrl ? \`
+              <div style="border-top:1px solid var(--border-color);padding-top:10px;display:grid;gap:6px;">
+                <div style="font-size:.76rem;font-weight:800;color:var(--text-secondary);">OFFICIAL TEXTBOOK SOURCES</div>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:.8rem;">
+                  <a href="\${esc(b.sourceUrl)}" target="_blank" rel="noopener noreferrer">\${esc(b.sourceLabel || "Official textbook")} ↗</a>
+                  <a href="\${esc(b.supplementarySourceUrl || b.sourceUrl)}" target="_blank" rel="noopener noreferrer">\${esc(b.supplementarySourceLabel || "Digital resources")} ↗</a>
+                  <a href="\${esc(b.syllabusUrl || b.sourceUrl)}" target="_blank" rel="noopener noreferrer">Syllabus / academic updates ↗</a>
+                </div>
+                <div style="font-size:.72rem;color:var(--text-muted);">\${esc(b.sourceAttribution || "Open the official publisher portal for the original textbook.")}</div>
+              </div>\` : ""}
           </div>
         `).join("")}
       </div>
@@ -1125,6 +1142,7 @@ window.SP = {
   togglePracticeRetry: () => { state.practiceState.retryOnly = !state.practiceState.retryOnly; state.practiceState.idx = 0; state.practiceState.answered = false; render(); },
   resetPracticeFilters: () => { state.practiceState = { idx: 0, answered: false, selected: "", difficulty: "ALL", retryOnly: false }; render(); },
   setPlayTopic: (topic) => { Object.assign(state.gameState,{playTopic:topic,playRound:null,playIndex:0,playScore:0,playAnswered:false,playSelected:"",playFeedback:""}); render(); },
+  setPlayMode: (mode) => { Object.assign(state.gameState,{playMode:mode,playRound:null,playIndex:0,playScore:0,playAnswered:false,playSelected:"",playFeedback:""}); render(); },
   answerTopicPlay: (index) => { const q=state.gameState.playRound?.[state.gameState.playIndex]; if(!q||state.gameState.playAnswered)return; state.gameState.playSelected=(q.options||[])[index]??""; render(); },
   submitTopicPlay: () => { const gs=state.gameState,q=gs.playRound?.[gs.playIndex]; if(!q||gs.playAnswered)return; const typed=document.getElementById("sp-play-answer")?.value||gs.playSelected||""; gs.playSelected=typed; gs.playAnswered=true; const ok=normalizeAns(typed)===normalizeAns(q.ans); if(ok)gs.playScore=(gs.playScore||0)+1; gs.playFeedback=ok?"Correct! Well done.":"Not quite. Review the explanation, then continue."; render(); },
   nextTopicPlay: () => { const gs=state.gameState; gs.playIndex++;gs.playAnswered=false;gs.playSelected="";gs.playFeedback="";render(); },

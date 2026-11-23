@@ -274,33 +274,357 @@ const SUB_META = {
   sanskrit: { en: "Sanskrit (संस्कृत)", hi: "संस्कृत", color: "#7c3aed" }
 };
 
+
+export function buildMathsChapterContent(classNum, medium, chTitle) {
+  const c = Number(classNum);
+  const isHi = medium === "HI";
+  const title = chTitle.replace(/^\d+\.\s*/, "");
+  const key = title.toLowerCase();
+  const q = (en, hi, options, ans, explanation, topic) => ({
+    q: isHi ? hi : en, options, ans, explanation, topic: topic || title
+  });
+  let concepts = [], examples = [], questions = [], topic = title;
+
+  if (/coordinate|निर्देशांक|cartesian/.test(key)) {
+    topic = "Coordinate Geometry";
+    if (c >= 10) {
+      concepts = [
+        { term: "Distance Formula", def: "d = √[(x₂−x₁)²+(y₂−y₁)²]" },
+        { term: "Section Formula", def: "For ratio m:n, P = ((mx₂+nx₁)/(m+n), (my₂+ny₁)/(m+n))." },
+        { term: "Area of Triangle", def: "½|x₁(y₂−y₃)+x₂(y₃−y₁)+x₃(y₁−y₂)|." }
+      ];
+      examples = [{ q: "Find the distance between A(2,3) and B(5,7).", a: "√[(5−2)²+(7−3)²] = √25 = 5 units." }];
+      questions = [
+        q("Distance between (0,0) and (3,4) is:", "(0,0) और (3,4) के बीच दूरी है:", ["3","4","5","7"], "5", "√(3²+4²)=5."),
+        q("Distance between (1,2) and (4,6) is:", "(1,2) और (4,6) के बीच दूरी है:", ["3","4","5","6"], "5", "√(3²+4²)=5."),
+        q("Midpoint of (2,4) and (6,8) is:", "(2,4) और (6,8) का मध्यबिंदु है:", ["(4,6)","(8,12)","(2,6)","(6,4)"], "(4,6)", "Average the x-coordinates and y-coordinates."),
+        q("The point dividing (0,0) and (6,0) internally in ratio 1:2 is:", "(0,0) और (6,0) को 1:2 में बाँटने वाला बिंदु है:", ["(2,0)","(3,0)","(4,0)","(6,0)"], "(2,0)", "Section formula gives x=(1×6+2×0)/3=2 and y=0."),
+        q("Distance of (−3,4) from the origin is:", "(−3,4) की मूल बिंदु से दूरी है:", ["3","4","5","7"], "5", "√[(-3)²+4²]=5."),
+        q("The x-coordinate of every point on the y-axis is:", "y-अक्ष पर प्रत्येक बिंदु का x-निर्देशांक है:", ["0","1","−1","Depends on y"], "0", "Every point on the y-axis has x=0."),
+        q("Area of triangle with vertices (0,0),(4,0),(0,3) is:", "(0,0),(4,0),(0,3) शीर्षों वाले त्रिभुज का क्षेत्रफल है:", ["6","7","12","24"], "6", "½×4×3=6 square units."),
+        q("If the distance between two points is zero, the points are:", "यदि दो बिंदुओं के बीच दूरी शून्य है, तो वे हैं:", ["Coincident","Parallel","Perpendicular","On different axes"], "Coincident", "Both coordinates are equal.")
+      ];
+    } else {
+      concepts = [
+        { term: "Cartesian Plane", def: "The x-axis and y-axis are perpendicular number lines that form the coordinate plane." },
+        { term: "Ordered Pair", def: "In (x,y), x is the abscissa and y is the ordinate." },
+        { term: "Quadrants", def: "The axes divide the plane into four quadrants." }
+      ];
+      examples = [{ q: "Plot the point (3,−2).", a: "Move 3 units right and 2 units down from the origin." }];
+      questions = [
+        q("Coordinates of the origin are:", "मूल बिंदु के निर्देशांक हैं:", ["(0,0)","(1,0)","(0,1)","(1,1)"], "(0,0)", "The axes intersect at (0,0)."),
+        q("A point with x>0 and y>0 lies in:", "जिस बिंदु के x और y दोनों धनात्मक हों, वह है:", ["Quadrant I","Quadrant II","Quadrant III","Quadrant IV"], "Quadrant I", "Both coordinates are positive in Quadrant I."),
+        q("The x-coordinate is also called:", "x-निर्देशांक को कहते हैं:", ["Abscissa","Ordinate","Origin","Axis"], "Abscissa", "The x-coordinate is the abscissa."),
+        q("The y-coordinate is also called:", "y-निर्देशांक को कहते हैं:", ["Ordinate","Abscissa","Origin","Quadrant"], "Ordinate", "The y-coordinate is the ordinate."),
+        q("A point on the x-axis has y-coordinate:", "x-अक्ष पर स्थित बिंदु का y-निर्देशांक है:", ["0","1","−1","Any value"], "0", "Every point on the x-axis has y=0."),
+        q("The point (−2,3) lies in:", "बिंदु (−2,3) स्थित है:", ["Quadrant II","Quadrant I","Quadrant III","Quadrant IV"], "Quadrant II", "Negative x and positive y means Quadrant II."),
+        q("The point (4,−1) lies in:", "बिंदु (4,−1) स्थित है:", ["Quadrant IV","Quadrant I","Quadrant II","Quadrant III"], "Quadrant IV", "Positive x and negative y means Quadrant IV."),
+        q("In (5,−3), the ordinate is:", "(5,−3) में कोटि है:", ["−3","5","3","−5"], "−3", "The ordinate is the second coordinate.")
+      ];
+    }
+  } else if (/real number|prime|factor|hcf|lcm|संख्या पद्धति|वास्तविक संख्या|अभाज्य/.test(key)) {
+    topic = "Number Systems";
+    concepts = [{ term: "Prime Factorisation", def: "Express a composite number as a product of prime numbers." }, { term: "HCF and LCM", def: "HCF is the greatest common factor; LCM is the least common multiple." }];
+    examples = [{ q: "Find the HCF of 18 and 24.", a: "The common factors are 1,2,3,6; HCF=6." }];
+    questions = [
+      q("Prime factorisation of 60 is:", "60 का अभाज्य गुणनखंडन है:", ["2²×3×5","2×3×10","2×2×15","3×20"], "2²×3×5", "60=2×2×3×5."),
+      q("HCF of 18 and 24 is:", "18 और 24 का महत्तम समापवर्तक है:", ["3","6","12","72"], "6", "The greatest common factor is 6."),
+      q("LCM of 4 and 6 is:", "4 और 6 का लघुत्तम समापवर्त्य है:", ["10","12","18","24"], "12", "12 is the smallest common multiple."),
+      q("Which number is prime?", "इनमें से कौन-सी संख्या अभाज्य है?", ["21","27","29","33"], "29", "29 has only 1 and 29 as factors."),
+      q("HCF × LCM of 12 and 15 equals:", "12 और 15 के HCF × LCM का मान है:", ["27","60","180","3"], "180", "HCF×LCM=12×15=180."),
+      q("The decimal expansion of 1/8 is:", "1/8 का दशमलव प्रसार है:", ["Terminating","Recurring","Non-recurring","Irrational"], "Terminating", "1/8=0.125."),
+      q("Which is irrational?", "इनमें से कौन अपरिमेय है?", ["√2","√9","0.5","3/4"], "√2", "√2 cannot be expressed as a ratio of integers."),
+      q("If HCF(a,b)=1, the numbers are:", "यदि HCF(a,b)=1 है, तो संख्याएँ हैं:", ["Co-prime","Even","Equal","Composite"], "Co-prime", "Numbers with HCF 1 are co-prime.")
+    ];
+  } else if (/polynomial|बहुपद/.test(key)) {
+    topic = "Polynomials";
+    concepts = [{ term: "Zero of a Polynomial", def: "α is a zero of p(x) when p(α)=0." }, { term: "Degree", def: "The highest power of the variable with a non-zero coefficient." }];
+    examples = [{ q: "For p(x)=x²−5x+6, find p(2).", a: "4−10+6=0." }];
+    questions = [
+      q("If p(x)=x²−5x+6, p(2) is:", "यदि p(x)=x²−5x+6, तो p(2) है:", ["0","1","2","4"], "0", "4−10+6=0."),
+      q("Degree of 7x³+2x−1 is:", "7x³+2x−1 की घात है:", ["1","2","3","7"], "3", "The highest power is 3."),
+      q("A zero of x−4 is:", "x−4 का एक शून्यक है:", ["−4","0","4","1"], "4", "4−4=0."),
+      q("Coefficient of x in 3x²−7x+2 is:", "3x²−7x+2 में x का गुणांक है:", ["3","−7","2","7"], "−7", "The coefficient multiplying x is −7."),
+      q("Sum of zeroes of x²−5x+6 is:", "x²−5x+6 के शून्यकों का योग है:", ["5","6","−5","−6"], "5", "Sum=−b/a."),
+      q("Product of zeroes of x²−5x+6 is:", "x²−5x+6 के शून्यकों का गुणनफल है:", ["5","6","−5","−6"], "6", "Product=c/a."),
+      q("(x+2)(x−2) equals:", "(x+2)(x−2) बराबर है:", ["x²−4","x²+4","x²−2","x²+2"], "x²−4", "Difference of squares."),
+      q("A non-zero constant polynomial has degree:", "एक अशून्य अचर बहुपद की घात है:", ["0","1","2","Undefined"], "0", "A non-zero constant has degree zero.")
+    ];
+  } else if (/linear equation|linear equations|रैखिक समीकरण/.test(key)) {
+    topic = "Linear Equations";
+    concepts = [{ term: "Linear Equation", def: "An equation in which the highest power of each variable is 1." }];
+    examples = [{ q: "Solve 2x+3=11.", a: "2x=8, so x=4." }];
+    questions = [
+      q("Solve 2x+3=11:", "2x+3=11 हल करें:", ["2","3","4","5"], "4", "2x=8, x=4."),
+      q("If x+y=7 and x−y=1, x is:", "यदि x+y=7 और x−y=1, तो x है:", ["2","3","4","5"], "4", "Add equations: 2x=8."),
+      q("Graph of a linear equation in two variables is a:", "दो चरों वाले रैखिक समीकरण का आलेख है:", ["Straight line","Circle","Parabola","Curve"], "Straight line", "A linear equation graphs as a straight line."),
+      q("A solution of x+y=5 is:", "x+y=5 का एक हल है:", ["(2,3)","(1,1)","(5,5)","(0,0)"], "(2,3)", "2+3=5."),
+      q("If 3x=21, x equals:", "यदि 3x=21, तो x है:", ["6","7","8","9"], "7", "Divide both sides by 3."),
+      q("Parallel distinct lines have:", "भिन्न समांतर रेखाओं के:", ["No solution","One solution","Two solutions","Infinite solutions"], "No solution", "Parallel distinct lines never intersect."),
+      q("If x=2 in 2x+y=9, y is:", "2x+y=9 में x=2 रखने पर y है:", ["3","4","5","6"], "5", "4+y=9."),
+      q("The pair x+y=4 and 2x+2y=8 has:", "x+y=4 और 2x+2y=8 के:", ["Infinitely many solutions","No solution","One solution","Exactly two"], "Infinitely many solutions", "Both equations represent the same line.")
+    ];
+  } else if (/quadratic|द्विघात/.test(key)) {
+    topic = "Quadratic Equations";
+    concepts = [{ term: "Quadratic Equation", def: "An equation ax²+bx+c=0 where a≠0." }, { term: "Discriminant", def: "D=b²−4ac determines the nature of roots." }];
+    examples = [{ q: "Solve x²−9=0.", a: "x²=9, so x=±3." }];
+    questions = [
+      q("Roots of x²−9=0 are:", "x²−9=0 के मूल हैं:", ["±3","±9","3 only","0 and 3"], "±3", "x²=9."),
+      q("Discriminant of x²−5x+6=0 is:", "x²−5x+6=0 का विविक्तकर है:", ["1","−1","25","49"], "1", "D=25−24=1."),
+      q("If D>0, the roots are:", "यदि D>0 हो, तो मूल होते हैं:", ["Real and distinct","Real and equal","Not real","Zero"], "Real and distinct", "A positive discriminant gives two distinct real roots."),
+      q("Product of roots of 2x²−3x+4=0 is:", "2x²−3x+4=0 के मूलों का गुणनफल है:", ["2","3/2","4","−2"], "2", "Product=c/a=4/2=2."),
+      q("A quadratic equation has degree:", "द्विघात समीकरण की घात है:", ["1","2","3","4"], "2", "The highest power is 2."),
+      q("Which is a quadratic equation?", "कौन-सा द्विघात समीकरण है?", ["x²+3x+2=0","2x+1=0","x³−1=0","x=5"], "x²+3x+2=0", "Its highest power is 2."),
+      q("Sum of roots of x²−7x+10=0 is:", "x²−7x+10=0 के मूलों का योग है:", ["7","10","−7","−10"], "7", "Sum=−b/a=7."),
+      q("If roots are equal, the discriminant is:", "यदि मूल समान हों, तो विविक्तकर है:", ["0","1","Negative","Positive"], "0", "Equal roots occur when D=0.")
+    ];
+  } else if (/arithmetic progression|progression|समांतर श्रेणी|समांतर श्रेढ़ी/.test(key)) {
+    topic = "Arithmetic Progressions";
+    concepts = [{ term: "Common Difference", def: "The difference between consecutive terms of an arithmetic progression." }, { term: "nth Term", def: "aₙ=a+(n−1)d." }];
+    examples = [{ q: "Find the 10th term of 2,5,8,...", a: "a₁₀=2+9×3=29." }];
+    questions = [
+      q("Common difference of 2,5,8,11,... is:", "2,5,8,11,... का सार्व अंतर है:", ["2","3","4","5"], "3", "5−2=3."),
+      q("The 10th term of 2,5,8,... is:", "2,5,8,... का 10वाँ पद है:", ["26","27","29","30"], "29", "a₁₀=2+9×3=29."),
+      q("Next term of 7,11,15,... is:", "7,11,15,... का अगला पद है:", ["17","18","19","20"], "19", "Add common difference 4."),
+      q("If a=4 and d=2, the 5th term is:", "यदि a=4 और d=2, तो पाँचवाँ पद है:", ["10","12","14","16"], "12", "a₅=4+4×2=12."),
+      q("An AP has common difference zero when:", "AP का सार्व अंतर शून्य कब होता है:", ["All terms equal","Terms increase","Terms decrease","Terms alternate"], "All terms equal", "Each consecutive term is the same."),
+      q("Sum of first n terms is:", "पहले n पदों का योग है:", ["n/2[2a+(n−1)d]","a+(n−1)d","ad","n+d"], "n/2[2a+(n−1)d]", "Standard AP sum formula."),
+      q("If a=3, d=4, the 4th term is:", "यदि a=3, d=4, तो चौथा पद है:", ["11","12","15","19"], "15", "a₄=3+3×4=15."),
+      q("The sequence 5,5,5,5,... is:", "5,5,5,5,... श्रेणी है:", ["An AP with d=0","Not an AP","A GP only","Neither"], "An AP with d=0", "Consecutive differences are zero.")
+    ];
+  } else if (/trigonometry|त्रिकोणमिति/.test(key)) {
+    topic = "Trigonometry";
+    concepts = [{ term: "sin θ", def: "Opposite side / Hypotenuse in a right triangle." }, { term: "Identity", def: "sin²θ+cos²θ=1." }];
+    examples = [{ q: "Evaluate sin 30° + cos 60°.", a: "1/2+1/2=1." }];
+    questions = [
+      q("sin 30° equals:", "sin 30° का मान है:", ["1/2","√3/2","1","0"], "1/2", "Standard trigonometric value."),
+      q("tan 45° equals:", "tan 45° का मान है:", ["0","1","√3","1/√3"], "1", "tan 45°=1."),
+      q("sin²θ+cos²θ equals:", "sin²θ+cos²θ बराबर है:", ["0","1","2","tan θ"], "1", "Fundamental identity."),
+      q("cos 0° equals:", "cos 0° का मान है:", ["0","1","1/2","√3/2"], "1", "cos 0°=1."),
+      q("sec θ is the reciprocal of:", "sec θ किसका व्युत्क्रम है:", ["cos θ","sin θ","tan θ","cot θ"], "cos θ", "sec θ=1/cos θ."),
+      q("If sin θ=3/5 for acute θ, cos θ is:", "न्यूनकोण θ के लिए sin θ=3/5 हो, तो cos θ है:", ["4/5","3/4","5/4","1/5"], "4/5", "Use the 3-4-5 right triangle."),
+      q("1+tan²θ equals:", "1+tan²θ बराबर है:", ["sec²θ","cosec²θ","sin²θ","cos²θ"], "sec²θ", "Standard identity."),
+      q("cot θ equals:", "cot θ बराबर है:", ["1/tan θ","1/sin θ","1/cos θ","tan θ"], "1/tan θ", "cot θ is reciprocal of tan θ.")
+    ];
+  } else if (/probability|प्रायिकता/.test(key)) {
+    topic = "Probability";
+    concepts = [{ term: "Probability", def: "For equally likely outcomes, P(E)=favourable outcomes/total outcomes." }];
+    examples = [{ q: "Probability of an even number on a fair die.", a: "3/6=1/2." }];
+    questions = [
+      q("Probability of getting a 6 on a fair die is:", "एक निष्पक्ष पासे पर 6 आने की प्रायिकता है:", ["1/6","1/3","1/2","1"], "1/6", "One favourable outcome out of six."),
+      q("Probability of an impossible event is:", "असंभव घटना की प्रायिकता है:", ["0","1","1/2","−1"], "0", "An impossible event has probability zero."),
+      q("Probability of a sure event is:", "निश्चित घटना की प्रायिकता है:", ["0","1","1/2","2"], "1", "A sure event always occurs."),
+      q("A coin is tossed once. Probability of heads:", "एक सिक्का उछालने पर चित आने की प्रायिकता:", ["1/2","1/4","1","0"], "1/2", "One of two equally likely outcomes."),
+      q("A die has how many possible outcomes?", "एक पासे के कितने संभावित परिणाम हैं?", ["4","5","6","8"], "6", "The outcomes are 1 through 6."),
+      q("Probability always lies between:", "प्रायिकता सदैव किसके बीच होती है:", ["0 and 1","−1 and 1","1 and 2","0 and 10"], "0 and 1", "Probability is between 0 and 1 inclusive."),
+      q("Probability of an even number on a die:", "पासे पर सम संख्या आने की प्रायिकता:", ["1/2","1/3","1/6","2/3"], "1/2", "Three even outcomes out of six."),
+      q("If P(E)=0.25, P(not E) is:", "यदि P(E)=0.25, तो P(E नहीं) है:", ["0.25","0.5","0.75","1"], "0.75", "Complement probability is 1−0.25.")
+    ];
+  } else if (/statistics|data handling|data through|आँकड़ों|सांख्यिकी/.test(key)) {
+    topic = "Statistics and Data";
+    concepts = [{ term: "Mean", def: "Sum of observations divided by the number of observations." }, { term: "Median", def: "The middle observation after arranging data in order." }, { term: "Mode", def: "The observation that occurs most often." }];
+    examples = [{ q: "Find the mean of 2,4,6.", a: "(2+4+6)/3=4." }];
+    questions = [
+      q("Mean of 2,4,6 is:", "2,4,6 का माध्य है:", ["3","4","5","6"], "4", "12/3=4."),
+      q("Mode of 2,3,3,4,5 is:", "2,3,3,4,5 का बहुलक है:", ["2","3","4","5"], "3", "3 occurs most often."),
+      q("Median of 1,3,5 is:", "1,3,5 की माध्यिका है:", ["1","3","5","9"], "3", "The middle value is 3."),
+      q("Range of 4,9,2,7 is:", "4,9,2,7 का परिसर है:", ["5","6","7","9"], "7", "Maximum 9 minus minimum 2."),
+      q("Mean is calculated by:", "माध्य ज्ञात करने के लिए:", ["Sum ÷ number of observations","Largest − smallest","Most frequent value","Middle value only"], "Sum ÷ number of observations", "Mean is total divided by count."),
+      q("Median of 2,4,6,8 is:", "2,4,6,8 की माध्यिका है:", ["4","5","6","7"], "5", "Average of middle values (4+6)/2."),
+      q("Mode is the value that appears:", "बहुलक वह मान है जो:", ["Most often","Least often","In the middle","Only once"], "Most often", "Mode is the most frequent value."),
+      q("Range equals:", "परिसर बराबर है:", ["Maximum−Minimum","Maximum+Minimum","Mean×Count","Sum÷Count"], "Maximum−Minimum", "Range measures spread.")
+    ];
+  } else if (/fraction|भिन्न/.test(key)) {
+    topic = "Fractions";
+    concepts = [{ term: "Equivalent Fractions", def: "Fractions that represent the same value." }];
+    examples = [{ q: "Simplify 6/8.", a: "Divide numerator and denominator by 2: 3/4." }];
+    questions = [
+      q("Simplify 6/8:", "6/8 को सरल करें:", ["1/2","2/3","3/4","4/5"], "3/4", "Divide numerator and denominator by 2."),
+      q("1/2 + 1/4 equals:", "1/2 + 1/4 बराबर है:", ["1/4","2/4","3/4","1"], "3/4", "2/4+1/4=3/4."),
+      q("Which fraction is equivalent to 2/3?", "2/3 के बराबर भिन्न है:", ["4/6","3/4","2/6","5/6"], "4/6", "Multiply numerator and denominator by 2."),
+      q("Numerator of 5/7 is:", "5/7 का अंश है:", ["5","7","12","2"], "5", "The top number is the numerator."),
+      q("3/4 of 20 is:", "20 का 3/4 है:", ["10","12","15","18"], "15", "20÷4×3=15."),
+      q("Which is greater?", "कौन-सी भिन्न बड़ी है?", ["1/2","1/4","Equal","Cannot compare"], "1/2", "One half is greater than one quarter."),
+      q("A fraction with numerator smaller than denominator is:", "जिस भिन्न का अंश हर से छोटा हो वह है:", ["Proper fraction","Improper fraction","Mixed number","Integer"], "Proper fraction", "A proper fraction is less than one."),
+      q("5/5 equals:", "5/5 बराबर है:", ["0","1","5","10"], "1", "Any non-zero number divided by itself is 1.")
+    ];
+  } else if (/area related to circles|वृत्तों से संबंधित क्षेत्रफल/.test(key)) {
+    topic = "Areas Related to Circles";
+    concepts = [{ term: "Circumference", def: "C=2πr." }, { term: "Area of a Circle", def: "A=πr²." }, { term: "Sector Area", def: "For central angle θ, area=(θ/360°)πr²." }];
+    examples = [{ q: "Find the area of a circle of radius 7 cm.", a: "π×7²=49π=154 cm² (using π=22/7)." }];
+    questions = [
+      q("Area of a circle of radius 7 cm (π=22/7) is:", "7 सेमी त्रिज्या वाले वृत्त का क्षेत्रफल (π=22/7) है:", ["44 cm²","154 cm²","308 cm²","49 cm²"], "154 cm²", "πr²=(22/7)×49=154."),
+      q("Circumference of a circle of radius 7 cm (π=22/7) is:", "7 सेमी त्रिज्या वाले वृत्त की परिधि है:", ["22 cm","44 cm","49 cm","154 cm"], "44 cm", "2πr=2×22/7×7=44."),
+      q("Area of a semicircle of radius r is:", "r त्रिज्या वाले अर्धवृत्त का क्षेत्रफल है:", ["πr²","½πr²","2πr","πr"], "½πr²", "A semicircle is half a circle."),
+      q("A sector of 90° is what fraction of a full circle?", "90° का त्रिज्यखंड पूरे वृत्त का कितना भाग है:", ["1/2","1/3","1/4","1/8"], "1/4", "90/360=1/4."),
+      q("If radius is doubled, area becomes:", "यदि त्रिज्या दोगुनी हो, तो क्षेत्रफल हो जाता है:", ["2 times","3 times","4 times","8 times"], "4 times", "Area is proportional to r²."),
+      q("Diameter of a circle with radius 5 cm is:", "5 सेमी त्रिज्या वाले वृत्त का व्यास है:", ["5 cm","10 cm","15 cm","25 cm"], "10 cm", "d=2r."),
+      q("Length of an arc of 180° is:", "180° के चाप की लंबाई है:", ["¼ circumference","½ circumference","Full circumference","Twice circumference"], "½ circumference", "A 180° arc is a semicircle."),
+      q("Area of a ring is:", "वलय का क्षेत्रफल है:", ["π(R²−r²)","π(R+r)²","2πR","πr²"], "π(R²−r²)", "Subtract the inner circle area from the outer circle area.")
+    ];
+  } else if (/surface area|volume|पृष्ठीय क्षेत्रफल|आयतन/.test(key)) {
+    topic = "Surface Areas and Volumes";
+    concepts = [{ term: "Cuboid Volume", def: "V=l×b×h." }, { term: "Cylinder Volume", def: "V=πr²h." }, { term: "Sphere Volume", def: "V=4/3πr³." }];
+    examples = [{ q: "Find the volume of a cube of side 3 cm.", a: "3³=27 cm³." }];
+    questions = [
+      q("Volume of a cube of side 3 cm is:", "3 सेमी भुजा वाले घन का आयतन है:", ["9 cm³","18 cm³","27 cm³","36 cm³"], "27 cm³", "V=a³=3³=27."),
+      q("Volume of a cuboid is:", "घनाभ का आयतन है:", ["l+b+h","2(lb+bh+hl)","l×b×h","4l"], "l×b×h", "Multiply length, breadth and height."),
+      q("Curved surface area of a cylinder is:", "बेलन का वक्र पृष्ठीय क्षेत्रफल है:", ["2πrh","πr²h","4πr²","πrl"], "2πrh", "CSA=2πrh."),
+      q("Volume of a cylinder is:", "बेलन का आयतन है:", ["2πrh","πr²h","4πr²","πrl"], "πr²h", "Volume=base area×height."),
+      q("Total surface area of a cube of side a is:", "a भुजा वाले घन का कुल पृष्ठीय क्षेत्रफल है:", ["4a²","6a²","a³","2a²"], "6a²", "A cube has six equal square faces."),
+      q("Volume of a sphere is:", "गोले का आयतन है:", ["4πr²","4/3πr³","πr²h","2πr"], "4/3πr³", "Standard sphere volume formula."),
+      q("The unit of volume is:", "आयतन की इकाई है:", ["cm","cm²","cm³","kg"], "cm³", "Volume is measured in cubic units."),
+      q("If each dimension of a cube is doubled, its volume becomes:", "यदि घन की प्रत्येक विमा दोगुनी हो, तो आयतन हो जाता है:", ["2 times","4 times","6 times","8 times"], "8 times", "Volume scales by 2³=8.")
+    ];
+  } else if (/circle|वृत्त/.test(key)) {
+    topic = "Circles";
+    concepts = [{ term: "Tangent", def: "A line that touches a circle at exactly one point." }, { term: "Radius and Tangent", def: "The radius through the point of contact is perpendicular to the tangent." }];
+    examples = [{ q: "A tangent touches a circle at how many points?", a: "Exactly one point." }];
+    questions = [
+      q("A tangent touches a circle at:", "स्पर्श रेखा वृत्त को कितने बिंदुओं पर छूती है:", ["One point","Two points","Three points","No point"], "One point", "A tangent has exactly one point of contact."),
+      q("The radius through the point of contact is _____ to the tangent:", "स्पर्श बिंदु पर त्रिज्या स्पर्श रेखा पर _____ होती है:", ["Parallel","Perpendicular","Equal","Oblique"], "Perpendicular", "The radius is at 90° to the tangent."),
+      q("Number of tangents from an external point to a circle is:", "वृत्त के बाहर स्थित बिंदु से खींची जा सकने वाली स्पर्श रेखाएँ हैं:", ["0","1","2","3"], "2", "Two tangents can be drawn from an external point."),
+      q("Tangents drawn from the same external point are:", "एक ही बाहरी बिंदु से खींची गई स्पर्श रेखाएँ होती हैं:", ["Equal","Unequal","Parallel","Perpendicular"], "Equal", "Lengths of tangents from an external point are equal."),
+      q("A line intersecting a circle at two points is a:", "वृत्त को दो बिंदुओं पर काटने वाली रेखा है:", ["Tangent","Secant","Radius","Chord only"], "Secant", "A secant intersects the circle at two points."),
+      q("The longest chord of a circle is its:", "वृत्त की सबसे लंबी जीवा है:", ["Radius","Diameter","Arc","Tangent"], "Diameter", "The diameter passes through the centre."),
+      q("A tangent is perpendicular to the radius at:", "स्पर्श रेखा त्रिज्या पर कहाँ लंब होती है:", ["Centre","Point of contact","Any point","Outside point"], "Point of contact", "The right angle occurs at the point of contact."),
+      q("If two tangents from P touch a circle at A and B, then:", "यदि P से खींची गई स्पर्श रेखाएँ A और B पर छूती हैं, तो:", ["PA=PB","PA>PB","PA<PB","PA+PB=0"], "PA=PB", "Tangents from an external point have equal lengths.")
+    ];
+  } else if (/triangle|त्रिभुज/.test(key)) {
+    topic = "Triangles";
+    concepts = [{ term: "Similarity", def: "Similar triangles have equal corresponding angles and proportional corresponding sides." }, { term: "Pythagoras Theorem", def: "In a right triangle, hypotenuse² = base² + perpendicular²." }];
+    examples = [{ q: "A right triangle has legs 3 cm and 4 cm. Find the hypotenuse.", a: "√(3²+4²)=5 cm." }];
+    questions = [
+      q("Sum of the interior angles of a triangle is:", "त्रिभुज के आंतरिक कोणों का योग है:", ["90°","180°","270°","360°"], "180°", "The angle sum property is 180°."),
+      q("In a right triangle with legs 3 and 4, hypotenuse is:", "3 और 4 भुजाओं वाले समकोण त्रिभुज का कर्ण है:", ["5","6","7","8"], "5", "√(3²+4²)=5."),
+      q("Similar triangles have corresponding angles:", "समरूप त्रिभुजों के संगत कोण होते हैं:", ["Equal","Supplementary","Complementary","Unequal"], "Equal", "Corresponding angles are equal."),
+      q("If corresponding sides are in ratio 2:3, their perimeters are in ratio:", "यदि संगत भुजाओं का अनुपात 2:3 है, तो परिमापों का अनुपात है:", ["2:3","4:9","3:2","1:1"], "2:3", "Perimeters of similar triangles follow the side ratio."),
+      q("A triangle with all three sides equal is:", "तीनों भुजाएँ समान वाला त्रिभुज है:", ["Equilateral","Isosceles","Scalene","Right"], "Equilateral", "All three sides are equal."),
+      q("The longest side of a right triangle is called:", "समकोण त्रिभुज की सबसे लंबी भुजा कहलाती है:", ["Base","Altitude","Hypotenuse","Median"], "Hypotenuse", "The hypotenuse is opposite the right angle."),
+      q("If two angles are 50° and 60°, the third angle is:", "यदि दो कोण 50° और 60° हैं, तो तीसरा कोण है:", ["60°","70°","80°","90°"], "70°", "180°−50°−60°=70°."),
+      q("The area of a triangle is:", "त्रिभुज का क्षेत्रफल है:", ["base×height","½×base×height","2×base×height","base+height"], "½×base×height", "Area is half the product of base and corresponding height.")
+    ];
+  } else if (/angle|line|geometry|shape|symmetry|circle|triangle|quadrilateral|आकृति|रेखा|कोण|सममिति|वृत्त|त्रिभुज/.test(key)) {
+    topic = "Geometry";
+    concepts = [{ term: "Angle", def: "An angle is formed by two rays with a common endpoint." }, { term: "Perpendicular Lines", def: "Lines that intersect at 90°." }];
+    examples = [{ q: "Find the complement of 35°.", a: "90°−35°=55°." }];
+    questions = [
+      q("A right angle measures:", "समकोण का माप है:", ["45°","60°","90°","180°"], "90°", "A right angle is 90 degrees."),
+      q("A straight angle measures:", "सरल कोण का माप है:", ["90°","120°","180°","360°"], "180°", "A straight angle forms a straight line."),
+      q("Sum of angles in a triangle is:", "त्रिभुज के कोणों का योग है:", ["90°","180°","270°","360°"], "180°", "Triangle angle sum property."),
+      q("A square has how many lines of symmetry?", "वर्ग में सममिति की कितनी रेखाएँ होती हैं:", ["2","3","4","6"], "4", "A square has four symmetry axes."),
+      q("A polygon with 5 sides is a:", "5 भुजाओं वाला बहुभुज है:", ["Pentagon","Hexagon","Triangle","Octagon"], "Pentagon", "Penta means five."),
+      q("Diameter is how many times the radius?", "व्यास, त्रिज्या का कितने गुना है:", ["1","2","3","4"], "2", "Diameter=2×radius."),
+      q("Complement of 35° is:", "35° का पूरक कोण है:", ["45°","55°","65°","145°"], "55°", "90°−35°=55°."),
+      q("Perimeter of a square of side 5 cm is:", "5 सेमी भुजा वाले वर्ग का परिमाप है:", ["10 cm","15 cm","20 cm","25 cm"], "20 cm", "4×5=20 cm.")
+    ];
+  } else if (/area|perimeter|measurement|length|weight|capacity|volume|क्षेत्रफल|परिमाप|मापन|लंबाई|भार|आयतन/.test(key)) {
+    topic = "Measurement";
+    concepts = [{ term: "Perimeter", def: "The total length around a closed shape." }, { term: "Area", def: "The measure of the surface enclosed by a plane shape." }];
+    examples = [{ q: "Area of a rectangle 6 cm by 4 cm.", a: "6×4=24 cm²." }];
+    questions = [
+      q("Perimeter of a rectangle 6 cm by 4 cm is:", "6 सेमी × 4 सेमी आयत का परिमाप है:", ["10 cm","20 cm","24 cm","48 cm"], "20 cm", "2(6+4)=20 cm."),
+      q("Area of a rectangle 6 cm by 4 cm is:", "6 सेमी × 4 सेमी आयत का क्षेत्रफल है:", ["10 cm²","20 cm²","24 cm²","48 cm²"], "24 cm²", "6×4=24 cm²."),
+      q("1 metre equals:", "1 मीटर बराबर है:", ["10 cm","100 cm","1000 cm","10 mm"], "100 cm", "1 m=100 cm."),
+      q("Area of a square of side 5 cm is:", "5 सेमी भुजा वाले वर्ग का क्षेत्रफल है:", ["10 cm²","20 cm²","25 cm²","30 cm²"], "25 cm²", "5×5=25 cm²."),
+      q("1 kilogram equals:", "1 किलोग्राम बराबर है:", ["100 g","500 g","1000 g","10 g"], "1000 g", "1 kg=1000 g."),
+      q("Volume of a cube of side 2 cm is:", "2 सेमी भुजा वाले घन का आयतन है:", ["4 cm³","6 cm³","8 cm³","12 cm³"], "8 cm³", "2³=8 cm³."),
+      q("Perimeter is measured in:", "परिमाप मापा जाता है:", ["Linear units","Square units","Cubic units","Litres"], "Linear units", "Perimeter is a length."),
+      q("Area is measured in:", "क्षेत्रफल मापा जाता है:", ["Linear units","Square units","Cubic units","Kilograms"], "Square units", "Area uses square units.")
+    ];
+  } else if (/addition|subtraction|जोड़|घटाव|give and take|making 10|vegetable farm/.test(key)) {
+    topic = "Addition and Subtraction";
+    concepts = [{ term: "Addition", def: "Combining quantities to find a total." }, { term: "Subtraction", def: "Finding the difference or what remains after taking away." }];
+    examples = [{ q: "Calculate 458+267.", a: "458+267=725." }];
+    questions = [
+      q("458+267 equals:", "458+267 बराबर है:", ["715","725","735","745"], "725", "Add ones, tens and hundreds."),
+      q("900−375 equals:", "900−375 बराबर है:", ["515","525","535","545"], "525", "900−375=525."),
+      q("What must be added to 38 to make 100?", "38 में क्या जोड़ें कि 100 हो जाए:", ["52","62","72","82"], "62", "100−38=62."),
+      q("If 125 books are on one shelf and 86 on another, total books are:", "एक शेल्फ पर 125 और दूसरी पर 86 पुस्तकें हैं, कुल कितनी:", ["201","211","221","231"], "211", "125+86=211."),
+      q("The difference between 1000 and 648 is:", "1000 और 648 का अंतर है:", ["342","352","362","372"], "352", "1000−648=352."),
+      q("Which number makes 47+___=90?", "47+___=90 में रिक्त स्थान का मान है:", ["33","43","53","63"], "43", "90−47=43."),
+      q("A shop sold 245 items in the morning and 178 in the evening. Total sold:", "दुकान ने सुबह 245 और शाम 178 वस्तुएँ बेचीं। कुल:", ["413","423","433","443"], "423", "245+178=423."),
+      q("Subtracting zero from a number leaves:", "किसी संख्या में से शून्य घटाने पर:", ["0","The same number","1","Double the number"], "The same number", "a−0=a.")
+    ];
+  } else if (/multiplication|division|grouping and sharing|equal groups|how many times|गुणा|भाग|समूह बनाना|बराबर समूह/.test(key)) {
+    topic = "Multiplication and Division";
+    concepts = [{ term: "Multiplication", def: "Repeated addition of equal groups." }, { term: "Division", def: "Sharing or grouping a quantity into equal parts." }];
+    examples = [{ q: "Find 24×5.", a: "24×5=120." }];
+    questions = [
+      q("24×5 equals:", "24×5 बराबर है:", ["100","110","120","125"], "120", "24 groups of 5 make 120."),
+      q("144÷12 equals:", "144÷12 बराबर है:", ["10","11","12","14"], "12", "12×12=144."),
+      q("8 groups of 6 make:", "6 के 8 समूहों में कुल हैं:", ["42","46","48","54"], "48", "8×6=48."),
+      q("If 45 sweets are shared equally among 5 children, each gets:", "45 मिठाइयाँ 5 बच्चों में बराबर बाँटने पर प्रत्येक को मिलेंगी:", ["8","9","10","11"], "9", "45÷5=9."),
+      q("The product of 13 and 7 is:", "13 और 7 का गुणनफल है:", ["81","91","101","111"], "91", "13×7=91."),
+      q("Which number makes 9×___=72?", "9×___=72 में रिक्त स्थान है:", ["6","7","8","9"], "8", "72÷9=8."),
+      q("36 objects arranged in 4 equal rows give objects per row:", "36 वस्तुओं को 4 बराबर पंक्तियों में रखने पर प्रत्येक पंक्ति में:", ["8","9","10","12"], "9", "36÷4=9."),
+      q("The remainder when 29 is divided by 5 is:", "29 को 5 से भाग देने पर शेषफल है:", ["2","3","4","5"], "4", "29=5×5+4.")
+    ];
+  } else if (/money|rupee|rupees|fun at the fair|how much can we spend|मुद्रा|रुपये|पैसे/.test(key)) {
+    topic = "Money";
+    concepts = [{ term: "Rupee", def: "The basic unit of Indian currency; 1 rupee = 100 paise." }, { term: "Total Cost", def: "Unit price multiplied by quantity." }];
+    examples = [{ q: "Three notebooks cost ₹12 each. Find the total.", a: "3×12=₹36." }];
+    questions = [
+      q("₹10 equals how many paise?", "₹10 में कितने पैसे होते हैं:", ["10","100","1000","10000"], "1000", "1 rupee=100 paise."),
+      q("Three notebooks cost ₹12 each. Total cost:", "तीन कॉपियों की कीमत ₹12 प्रति कॉपी है। कुल कीमत:", ["₹24","₹30","₹36","₹42"], "₹36", "3×12=36."),
+      q("You pay ₹100 for an item costing ₹68. Change:", "₹68 की वस्तु के लिए ₹100 देने पर वापस मिलेंगे:", ["₹22","₹28","₹32","₹38"], "₹32", "100−68=32."),
+      q("₹25+₹17 equals:", "₹25+₹17 बराबर है:", ["₹32","₹42","₹52","₹62"], "₹42", "25+17=42."),
+      q("Half of ₹80 is:", "₹80 का आधा है:", ["₹20","₹30","₹40","₹50"], "₹40", "80÷2=40."),
+      q("A pencil costs ₹7. Cost of 5 pencils:", "एक पेंसिल ₹7 की है। 5 पेंसिल की कीमत:", ["₹25","₹30","₹35","₹40"], "₹35", "7×5=35."),
+      q("₹5.50 is equal to how many paise?", "₹5.50 में कितने पैसे हैं:", ["50","500","550","505"], "550", "5.50 rupees=550 paise."),
+      q("Which is the greatest amount?", "सबसे बड़ी राशि कौन-सी है:", ["₹9.75","₹9.50","₹9.25","₹9.05"], "₹9.75", "Compare paise after the rupee value.")
+    ];
+  } else if (/time|calendar|clock|season|how do i spend my day|समय|कैलेंडर|घड़ी|दिनचर्या/.test(key)) {
+    topic = "Time and Calendar";
+    concepts = [{ term: "Hour", def: "1 hour = 60 minutes." }, { term: "Day", def: "1 day = 24 hours." }];
+    examples = [{ q: "Convert 2 hours into minutes.", a: "2×60=120 minutes." }];
+    questions = [
+      q("2 hours equals:", "2 घंटे बराबर हैं:", ["60 minutes","90 minutes","120 minutes","180 minutes"], "120 minutes", "2×60=120."),
+      q("How many days are in a leap year?", "लीप वर्ष में कितने दिन होते हैं:", ["364","365","366","367"], "366", "A leap year has 366 days."),
+      q("Quarter of an hour is:", "एक घंटे का चौथाई भाग है:", ["10 minutes","15 minutes","20 minutes","30 minutes"], "15 minutes", "60÷4=15."),
+      q("How many months are in a year?", "एक वर्ष में कितने महीने होते हैं:", ["10","11","12","13"], "12", "A year has 12 months."),
+      q("The minute hand completes one turn in:", "मिनट की सुई एक चक्कर पूरा करती है:", ["1 hour","12 hours","24 hours","1 minute"], "1 hour", "One full minute-hand turn is 60 minutes."),
+      q("3 weeks equal:", "3 सप्ताह बराबर हैं:", ["14 days","18 days","21 days","28 days"], "21 days", "3×7=21."),
+      q("A day has how many hours?", "एक दिन में कितने घंटे होते हैं:", ["12","18","24","36"], "24", "One day has 24 hours."),
+      q("30 minutes after 4:15 is:", "4:15 के 30 मिनट बाद समय होगा:", ["4:35","4:45","5:15","5:45"], "4:45", "Add 30 minutes.")
+    ];
+  } else if (/pattern|number play|number system|numbers|number|integer|counting in tens|गणित में पैटर्न|संख्याओं|पूर्णांक|संख्या/.test(key)) {
+    topic = "Number Patterns";
+    concepts = [{ term: "Pattern", def: "A sequence that follows a rule." }, { term: "Integer", def: "Positive whole numbers, negative whole numbers, and zero." }];
+    examples = [{ q: "Find the next number: 3,6,9,12,...", a: "15; add 3 each time." }];
+    questions = [
+      q("Next number: 3,6,9,12,...", "अगली संख्या: 3,6,9,12,...", ["13","14","15","16"], "15", "Add 3 each time."),
+      q("Value of (−4)+7 is:", "(−4)+7 का मान है:", ["−11","−3","3","11"], "3", "Move 7 units right from −4."),
+      q("The smallest whole number is:", "सबसे छोटी पूर्ण संख्या है:", ["−1","0","1","10"], "0", "Whole numbers start at zero."),
+      q("Next square number after 16 is:", "16 के बाद अगली वर्ग संख्या है:", ["20","24","25","36"], "25", "5²=25."),
+      q("Absolute value of −8 is:", "−8 का निरपेक्ष मान है:", ["−8","0","8","16"], "8", "Absolute value is distance from zero."),
+      q("Successor of 999 is:", "999 की परवर्ती संख्या है:", ["998","1000","1001","990"], "1000", "Add one."),
+      q("Predecessor of 100 is:", "100 की पूर्ववर्ती संख्या है:", ["98","99","101","110"], "99", "Subtract one."),
+      q("Which is an even number?", "इनमें से कौन सम संख्या है:", ["13","17","22","25"], "22", "Even numbers are divisible by 2.")
+    ];
+  } else {
+    return {
+      intro: isHi ? "इस अध्याय में दिए गए गणितीय विषय की मूल अवधारणाएँ सीखें।" : "Learn the mathematical ideas specific to this chapter.",
+      objectives: isHi ? ["अध्याय की अवधारणाएँ समझना", "उचित विधि से प्रश्न हल करना"] : ["Understand the chapter concepts", "Apply the appropriate mathematical method"],
+      explanation: isHi ? "प्रश्न में दी गई जानकारी पहचानें और उसी विषय से संबंधित नियम लागू करें।" : "Identify the given information and apply only the rules relevant to this chapter.",
+      concepts: [], examples: [], exercises: [], questions: []
+    };
+  }
+
+  return {
+    intro: isHi ? "इस अध्याय में " + topic + " की अवधारणाएँ और उनका उपयोग सीखें।" : "Learn the core ideas of " + topic + " and how to apply them.",
+    objectives: isHi ? [topic + " की मूल अवधारणाएँ समझना", "सही विधि और सूत्र चुनकर प्रश्न हल करना"] : ["Understand the key concepts in " + topic, "Apply the correct method and formula to chapter problems"],
+    explanation: isHi ? topic + " के प्रश्नों में दी गई जानकारी पहचानें, उपयुक्त नियम या सूत्र चुनें और चरणबद्ध हल करें।" : "Identify the given information, select the relevant rule or formula, and show each step clearly.",
+    concepts, examples, exercises: [], questions
+  };
+}
+
 function buildChapterSpecificContent(classNum, sub, medium, chTitle) {
   const isHi = medium === "HI" || sub === "hindi" || sub === "sanskrit";
   const cleanName = chTitle.replace(/^\d+\.\s*/, "");
   const c = Number(classNum);
 
-  if (sub === "maths") {
-    return {
-      intro: isHi
-        ? `इस अध्याय "${cleanName}" (कक्षा ${c}) में हम मुख्य परिभाषाओं, सूत्रों और हल किए गए उदाहरणों का अध्ययन करेंगे।`
-        : `In "${cleanName}" (Class ${c} Mathematics), you will master the core definitions, formulas, and step-by-step problem solving.`,
-      objectives: isHi
-        ? [`"${cleanName}" की मूल अवधारणा समझना`, "सूत्रों और चरणबद्ध विधियों से प्रश्न हल करना"]
-        : [`Understand core concepts of ${cleanName}`, "Apply step-by-step mathematical methods to solve exercises"],
-      explanation: isHi
-        ? `"${cleanName}" कक्षा ${c} गणित का महत्वपूर्ण अध्याय है। प्रश्न हल करते समय पहले दी गई राशियाँ लिखें, सही सूत्र चुनें और प्रत्येक चरण की जाँच करें।`
-        : `"${cleanName}" is an essential chapter in Class ${c} Mathematics. Always write down the given values first, identify the right formula or property, and verify units and signs at each step.`,
-      concepts: [{ term: cleanName, def: isHi ? `कक्षा ${c} के पाठ्यक्रम के अनुसार "${cleanName}" के मुख्य नियम और गुण।` : `Core definitions, properties, and problem-solving rules for ${cleanName}.` }],
-      examples: [{ q: isHi ? `"${cleanName}" पर आधारित एक उदाहरण हल करें: यदि x + 5 = 12 है, तो x का मान क्या होगा?` : `Solved Example for ${cleanName}: If 2x + 4 = 14, find x.`, a: isHi ? "x = 12 - 5 = 7" : "2x = 14 - 4 = 10, so x = 5." }],
-      exercises: [{ qNo: "1", marks: 2, q: isHi ? `"${cleanName}" के आधार पर हल करें: 15 × 4 + 10 का मान ज्ञात करें।` : `Practice Exercise (${cleanName}): Evaluate 15 × 4 + 10.`, hint: isHi ? "पहले गुणा करें, फिर जोड़ें।" : "Multiply first, then add.", ans: "70", steps: "1. 15 × 4 = 60\n2. 60 + 10 = 70." }],
-      questions: [
-        { q: isHi ? `कक्षा ${c} गणित (${cleanName}): 12 और 18 का योग क्या होगा?` : `Class ${c} Maths (${cleanName}): What is the HCF of 12 and 18?`, options: ["3", "6", "12", "30"], ans: isHi ? "30" : "6", explanation: isHi ? "12 + 18 = 30." : "Common factors of 12 and 18 are 1, 2, 3, 6; highest is 6." },
-        { q: isHi ? `यदि किसी वर्ग की भुजा 5 सेमी है, तो परिमाप क्या होगा?` : `If a square has side 5 cm, its perimeter is:`, options: ["10 cm", "20 cm", "25 cm", "15 cm"], ans: "20 cm", explanation: "Perimeter of a square = 4 × side = 4 × 5 = 20 cm." },
-        { q: isHi ? `(${cleanName}) 25 × 4 = ___` : `(${cleanName}) Fill in the blank: 25 × 4 = ___`, options: [], ans: "100", explanation: "25 multiplied by 4 equals 100." },
-        { q: isHi ? `(${cleanName}) किसी भी संख्या को 0 से गुणा करने पर गुणनफल 0 होता है।` : `(${cleanName}) Multiplying any number by 0 always gives 0.`, options: isHi ? ["सही", "गलत"] : ["True", "False"], ans: isHi ? "सही" : "True", explanation: "Zero property of multiplication: a × 0 = 0." }
-      ]
-    };
-  }
+  if (sub === "maths") return buildMathsChapterContent(classNum, medium, chTitle);
 
   if (sub === "science" || sub === "evs") {
     return {
@@ -457,6 +781,9 @@ function buildSubjectSpecificProblems(ch) {
 }
 
 function padChapterToTen(ch, qsForCh) {
+  // Maths questions and textbook exercises must never be padded with cross-chapter filler.
+  if (ch.subjectId === "maths") return [];
+
   const problems = buildSubjectSpecificProblems(ch);
   const exs = ch.exercises ? ch.exercises.slice() : [];
   let pIdx = 0;
